@@ -1,0 +1,5 @@
+package tickets
+
+class NotificationServiceApplication {
+
+}
