@@ -1,0 +1,114 @@
+# System environment and external storages
+version: '3.1'
+
+services:
+
+  #
+  # External systems for `tickets-service`
+  #
+  tickets-service-database:
+    image: postgres:14.1
+    container_name: tickets-service-database
+    restart: always
+    networks:
+      - tickets
+    environment:
+      POSTGRES_DB: "tickets"
+      POSTGRES_USER: tickets_user
+      POSTGRES_PASSWORD: tickets_password
+    ports:
+      - "15432:5432"
+
+  tickets-service-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
+    container_name: tickets-service-elasticsearch
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - http.port=19200
+    networks:
+      - tickets
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "19200:19200"
+
+  #
+  # External systems for `users-service`
+  #
+  users-service-redis:
+    image: redis
+    restart: always
+    networks:
+      - tickets
+    ports:
+      - "6379:6379"
+
+  #
+  # External systems for `notification-service`
+  #
+  notification-service-database:
+    image: postgres:14.1
+    restart: always
+    environment:
+      POSTGRES_DB: "tickets"
+      POSTGRES_USER: notification_user
+      POSTGRES_PASSWORD: notification_password
+    networks:
+      - tickets
+    ports:
+      - "25432:5432"
+
+
+  #
+  # Common infrastructure
+  #
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    hostname: zookeeper
+    networks:
+      - tickets
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka-1:
+    image: confluentinc/cp-enterprise-kafka:7.0.1
+    hostname: kafka-1
+    networks:
+      - tickets
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 101
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  kafka-2:
+    image: confluentinc/cp-enterprise-kafka:7.0.1
+    hostname: kafka-2
+    networks:
+      - tickets
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 102
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9093
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+networks:
+  tickets:
