@@ -16,7 +16,7 @@ In particular:
 # How to run
 Run environment using docker compose:
 ```
-docker-compose -d up
+docker-compose  up -d
 ```
 
 Then run system (set of applications) on particular stack and using particular telemetry, for instance:

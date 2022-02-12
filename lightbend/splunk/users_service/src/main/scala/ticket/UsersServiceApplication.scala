@@ -1,5 +1,0 @@
-package ticket
-
-class UsersServiceApplication {
-
-}

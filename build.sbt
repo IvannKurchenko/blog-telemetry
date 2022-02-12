@@ -19,8 +19,8 @@ lazy val lightbend_splunk_tickets_service =
       libraryDependencies := Dependencies.lightbend
     )
 
-lazy val lightbend_splunk_users_service =
-  (project in file("lightbend/splunk/users_service")).
+lazy val lightbend_splunk_projects_service =
+  (project in file("lightbend/splunk/projects_service")).
     settings(
       scalaVersion := "2.13.1",
       libraryDependencies := Dependencies.lightbend
@@ -43,8 +43,8 @@ lazy val lightbend_sentry_tickets_service =
       libraryDependencies := Dependencies.lightbend
     )
 
-lazy val lightbend_sentry_users_service =
-  (project in file("lightbend/sentry/users_service")).
+lazy val lightbend_sentry_projects_service =
+  (project in file("lightbend/sentry/projects_service")).
     settings(
       scalaVersion := "2.13.1",
       libraryDependencies := Dependencies.lightbend

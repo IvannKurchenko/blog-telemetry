@@ -38,13 +38,16 @@ services:
   #
   # External systems for `users-service`
   #
-  users-service-redis:
-    image: redis
+  users-service-mongo:
+    image: mongo:5.0.6
     restart: always
     networks:
       - tickets
     ports:
-      - "6379:6379"
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: users-service
+      MONGO_INITDB_ROOT_PASSWORD: users-service-pwd
 
   #
   # External systems for `notification-service`
