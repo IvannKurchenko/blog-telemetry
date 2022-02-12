@@ -27,8 +27,6 @@ object Dependencies {
     val slick = "com.typesafe.slick" %% "slick" % "3.3.3"
     val slickHikari = "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3"
 
-    val mongo = "org.mongodb.scala" %% "mongo-scala-driver" % "4.4.1"
-
     val kafka = "org.apache.kafka" %% "kafka" % "3.1.0"
 
     val kamonAkka = "io.kamon" %% "kamon-core" % "2.4.6"
@@ -46,7 +44,6 @@ object Dependencies {
       slick,
       slickHikari,
 
-      mongo,
       kafka,
 
       kamonAkka,

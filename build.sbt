@@ -9,9 +9,13 @@ lazy val load_testing =
       libraryDependencies := Dependencies.gatling
     )
 
-/*
- * Lightbend + Splunk
- */
+lazy val projects_service =
+  (project in file("stub_projects_service")).
+    settings(
+      scalaVersion := "2.13.1",
+      libraryDependencies := Dependencies.gatling
+    )
+
 lazy val lightbend_splunk_tickets_service =
   (project in file("lightbend/splunk/tickets_service")).
     settings(
@@ -19,39 +23,8 @@ lazy val lightbend_splunk_tickets_service =
       libraryDependencies := Dependencies.lightbend
     )
 
-lazy val lightbend_splunk_projects_service =
-  (project in file("lightbend/splunk/projects_service")).
-    settings(
-      scalaVersion := "2.13.1",
-      libraryDependencies := Dependencies.lightbend
-    )
-
-lazy val lightbend_splunk_notifications_service =
-  (project in file("lightbend/splunk/notifications_service")).
-    settings(
-      scalaVersion := "2.13.1",
-      libraryDependencies := Dependencies.lightbend
-    )
-
-/*
- * Lightbend + Sentry
- */
 lazy val lightbend_sentry_tickets_service =
   (project in file("lightbend/sentry/tickets_service")).
-    settings(
-      scalaVersion := "2.13.1",
-      libraryDependencies := Dependencies.lightbend
-    )
-
-lazy val lightbend_sentry_projects_service =
-  (project in file("lightbend/sentry/projects_service")).
-    settings(
-      scalaVersion := "2.13.1",
-      libraryDependencies := Dependencies.lightbend
-    )
-
-lazy val lightbend_sentry_notifications_service =
-  (project in file("lightbend/sentry/notifications_service")).
     settings(
       scalaVersion := "2.13.1",
       libraryDependencies := Dependencies.lightbend
