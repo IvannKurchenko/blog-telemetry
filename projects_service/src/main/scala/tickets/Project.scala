@@ -2,9 +2,8 @@ package tickets
 
 import io.circe.Codec
 import io.circe.generic.semiauto._
-import org.mongodb.scala.bson.codecs.Macros
 
-case class Project(id: String,
+case class Project(id: Long,
                    name: String,
                    description: String,
                    users: List[String],
@@ -15,14 +14,4 @@ case class Project(id: String,
 
 object Project {
   implicit val codec: Codec[Project] = deriveCodec
-  val codecProvider = Macros.createCodecProvider[Project]()
-}
-
-case class CreateProject(name: String,
-                         description: String,
-                         users: List[String],
-                         creator: String)
-
-object CreateProject {
-  implicit val codec: Codec[CreateProject] = deriveCodec
 }

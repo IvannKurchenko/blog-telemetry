@@ -7,13 +7,12 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.stream.Materializer
 import com.typesafe.scalalogging.LazyLogging
-import org.mongodb.scala._
 import pureconfig._
 import pureconfig.generic.auto._
 
 import scala.concurrent.duration._
 
-object ProjectsServiceApplication extends LazyLogging {
+object TicketsServiceApplication extends LazyLogging {
   def main(args: Array[String]): Unit = {
     implicit val system = ActorSystem(Behaviors.empty, "application-system")
     implicit val executionContext = system.executionContext
@@ -21,17 +20,13 @@ object ProjectsServiceApplication extends LazyLogging {
 
     val configuration = ConfigSource.default
       .at("application")
-      .loadOrThrow[ProjectApplicationConfiguration]
+      .loadOrThrow[TicketsConfiguration]
 
-    val client: MongoClient = MongoClient(configuration.mongoUrl)
-    val database: MongoDatabase = client.getDatabase("projects")
-
-    val projectsService = new ProjectsService(database)
-    val projectsApi = new ProjectsApi(projectsService)
+    val ticketsApi = new TicketsServiceApi()
 
     val binding = Http()
-      .newServerAt(configuration.host, configuration.port)
-      .bind(projectsApi.route)
+      .newServerAt(configuration.application.host, configuration.application.port)
+      .bind(ticketsApi.route)
 
 
     val shutdown = CoordinatedShutdown(system)

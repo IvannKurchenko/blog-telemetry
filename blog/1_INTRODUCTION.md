@@ -13,9 +13,8 @@ In particular, two main ecosystem we are going to consider:
 - Typelevel - ecosystem build on top of `cats-effect` library, such as `fs2`, `doobie`, `http4s` etc.
 
 # Telemetry and APM products
-In particular, following APM solutions are considered:
+In particular, following telemetry solutions are considered:
 - Splunk APM;
 - Sentry APM;
 - Datadog;
-- NewRelic;
-- Grafana (self-hosted);
+- Grafana;

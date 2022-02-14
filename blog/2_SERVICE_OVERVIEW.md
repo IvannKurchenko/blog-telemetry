@@ -22,11 +22,10 @@ Task ticketing system which we are going to monitor looks following at high leve
 We will focus on tickets service monitoring
 
 ### `tickets-service` API
-<br>`GET /v1/tickets` - fetch all tickets
 <br>`GET /v1/tickets?search={search-query}&project={}` - performs full text search over all tickets
 <br>`POST /v1/tickets` - create single ticket
 <br>`PUT /v1/tickets/:id` - update single ticket
-<br>`DELETE /v1/tickets` - delete single ticket
+<br>`DELETE /v1/tickets/:id` - delete single ticket
 
 Example ticket model is following: 
 ```json

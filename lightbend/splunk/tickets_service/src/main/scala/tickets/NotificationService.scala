@@ -1,5 +1,0 @@
-package tickets
-
-class NotificationService {
-
-}

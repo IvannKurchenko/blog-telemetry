@@ -1,14 +1,20 @@
-# System environment and external storages
+# Service environment
 version: '3.1'
 
 services:
 
-  #
-  # External systems for `tickets-service`
-  #
-  tickets-service-database:
+  projects_service:
+    image: projects_service
+    container_name: projects_service
+    restart: always
+    networks:
+        - tickets
+    ports:
+      - "10000:10000"
+
+  postgres:
     image: postgres:14.1
-    container_name: tickets-service-database
+    container_name: postgres
     restart: always
     networks:
       - tickets
@@ -19,9 +25,9 @@ services:
     ports:
       - "15432:5432"
 
-  tickets-service-elasticsearch:
+  elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
-    container_name: tickets-service-elasticsearch
+    container_name: elasticsearch
     restart: always
     environment:
       - discovery.type=single-node
@@ -35,39 +41,6 @@ services:
     ports:
       - "19200:19200"
 
-  #
-  # External systems for `users-service`
-  #
-  users-service-mongo:
-    image: mongo:5.0.6
-    restart: always
-    networks:
-      - tickets
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: users-service
-      MONGO_INITDB_ROOT_PASSWORD: users-service-pwd
-
-  #
-  # External systems for `notification-service`
-  #
-  notification-service-database:
-    image: postgres:14.1
-    restart: always
-    environment:
-      POSTGRES_DB: "tickets"
-      POSTGRES_USER: notification_user
-      POSTGRES_PASSWORD: notification_password
-    networks:
-      - tickets
-    ports:
-      - "25432:5432"
-
-
-  #
-  # Common infrastructure
-  #
   zookeeper:
     image: confluentinc/cp-zookeeper:7.0.1
     hostname: zookeeper

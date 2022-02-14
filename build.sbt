@@ -10,21 +10,27 @@ lazy val load_testing =
     )
 
 lazy val projects_service =
-  (project in file("stub_projects_service")).
+  (project in file("projects_service")).
+    enablePlugins(JavaAppPackaging).
+    enablePlugins(DockerPlugin).
     settings(
       scalaVersion := "2.13.1",
-      libraryDependencies := Dependencies.gatling
+      dockerExposedPorts := Seq(10000),
+      Docker / packageName  := "projects_service",
+      libraryDependencies := Dependencies.lightbend
     )
 
-lazy val lightbend_splunk_tickets_service =
-  (project in file("lightbend/splunk/tickets_service")).
+lazy val lightbend_splunk =
+  (project in file("lightbend/splunk")).
+    enablePlugins(DockerPlugin).
     settings(
       scalaVersion := "2.13.1",
       libraryDependencies := Dependencies.lightbend
     )
 
-lazy val lightbend_sentry_tickets_service =
-  (project in file("lightbend/sentry/tickets_service")).
+lazy val lightbend_sentry =
+  (project in file("lightbend/sentry")).
+    enablePlugins(DockerPlugin).
     settings(
       scalaVersion := "2.13.1",
       libraryDependencies := Dependencies.lightbend

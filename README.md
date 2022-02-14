@@ -14,12 +14,17 @@ In particular:
 ```
 
 # How to run
-Run environment using docker compose:
+Build necessary docker containers:
 ```
-docker-compose  up -d
+sbt docker:publishLocal
 ```
 
-Then run system (set of applications) on particular stack and using particular telemetry, for instance:
+Run environment using docker compose:
+```
+docker-compose up -d
+```
+
+Then run tickets service on particular stack and using particular telemetry, for instance:
 ```
 TODO
 ```
@@ -33,5 +38,5 @@ Check target APM or any monitoring tool and verify telemetry has been sent.
 
 Stop environment using docker compose:
 ```
-docker-compose -d up
+docker-compose down
 ```
