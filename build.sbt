@@ -16,8 +16,9 @@ lazy val projects_service =
     settings(
       scalaVersion := "2.13.1",
       dockerExposedPorts := Seq(10000),
+      libraryDependencies := Dependencies.lightbend,
       Docker / packageName  := "projects_service",
-      libraryDependencies := Dependencies.lightbend
+      Docker / version := "latest"
     )
 
 lazy val lightbend_splunk =

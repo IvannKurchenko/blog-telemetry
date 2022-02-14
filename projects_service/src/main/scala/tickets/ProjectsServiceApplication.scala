@@ -5,16 +5,14 @@ import akka.actor.CoordinatedShutdown
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
-import akka.stream.Materializer
 import com.typesafe.scalalogging.LazyLogging
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.duration._
 
 object ProjectsServiceApplication extends LazyLogging {
   def main(args: Array[String]): Unit = {
     implicit val system = ActorSystem(Behaviors.empty, "application-system")
-    implicit val executionContext = system.executionContext
-    implicit val materializer = Materializer(system)
 
     val projectsApi = new ProjectsApi()
 

@@ -16,7 +16,7 @@ In particular:
 # How to run
 Build necessary docker containers:
 ```
-sbt docker:publishLocal
+sbt projects_service/docker:publishLocal
 ```
 
 Run environment using docker compose:

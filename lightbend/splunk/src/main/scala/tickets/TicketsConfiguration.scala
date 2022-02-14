@@ -1,6 +1,6 @@
 package tickets
 
-case class ElasticsearchConfiguration()
+case class ElasticsearchConfiguration(url: String)
 
 case class PostgreConfiguration()
 
