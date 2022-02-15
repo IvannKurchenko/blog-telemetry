@@ -9,12 +9,15 @@ case class Ticket(id: Long,
                   modifiedAt: Long,
                   modifiedBy: String) {
   def toSearch: SearchTicket = {
-    SearchTicket(id, title, description)
+    SearchTicket(id, project, title, description)
   }
 }
 
+case class TicketEvent(event: String, ticket: Ticket)
+
 
 case class SearchTicket(id: Long,
+                        project: Long,
                         title: String,
                         description: String)
 
@@ -23,4 +26,10 @@ case class CreateTicket(project: Long,
                         title: String,
                         description: String,
                         creator: String)
+
+case class UpdateTicket(id: Long,
+                        project: Long,
+                        title: String,
+                        description: String,
+                        updater: String)
 

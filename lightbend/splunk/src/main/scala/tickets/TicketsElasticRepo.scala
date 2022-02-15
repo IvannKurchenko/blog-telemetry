@@ -8,6 +8,7 @@ import io.circe.generic.auto._
 import com.sksamuel.elastic4s.circe._
 import com.sksamuel.elastic4s.requests.common.RefreshPolicy
 import com.sksamuel.elastic4s.requests.indexes.{CreateIndexResponse, IndexResponse}
+import com.sksamuel.elastic4s.requests.searches.queries.Query
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -38,9 +39,16 @@ class TicketsElasticRepo(configuration: ElasticsearchConfiguration)
     }.map(_ => ())
   }
 
-  def searchTickets(query: String): Future[List[SearchTicket]] = {
+  def searchTickets(searchQuery: Option[String], projectId: Option[Long]): Future[List[SearchTicket]] = {
     client.execute {
-      search("tickets").query(query)
+      val queries: List[Query] = searchQuery.toList.map(query) ++ projectId.toList.map(termQuery("project", _))
+      search("tickets").bool(must(queries))
     }.map(_.result.to[SearchTicket].toList)
+  }
+
+  def deleteTicket(id: Long): Future[Unit] = {
+    client.execute {
+      deleteById("tickets", id.toString).refresh(RefreshPolicy.Immediate)
+    }.map(_ => ())
   }
 }

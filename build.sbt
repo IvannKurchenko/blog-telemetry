@@ -15,8 +15,9 @@ lazy val projects_service =
     enablePlugins(DockerPlugin).
     settings(
       scalaVersion := "2.13.1",
-      dockerExposedPorts := Seq(10000),
+      resolvers += "confluent" at "https://packages.confluent.io/maven/",
       libraryDependencies := Dependencies.lightbend,
+      dockerExposedPorts := Seq(10000),
       Docker / packageName  := "projects_service",
       Docker / version := "latest"
     )
@@ -26,6 +27,7 @@ lazy val lightbend_splunk =
     enablePlugins(DockerPlugin).
     settings(
       scalaVersion := "2.13.1",
+      resolvers += "confluent" at "https://packages.confluent.io/maven/",
       libraryDependencies := Dependencies.lightbend
     )
 
@@ -34,5 +36,6 @@ lazy val lightbend_sentry =
     enablePlugins(DockerPlugin).
     settings(
       scalaVersion := "2.13.1",
+      resolvers += "confluent" at "https://packages.confluent.io/maven/",
       libraryDependencies := Dependencies.lightbend
     )

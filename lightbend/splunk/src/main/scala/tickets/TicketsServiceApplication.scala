@@ -22,11 +22,18 @@ object TicketsServiceApplication extends LazyLogging {
       .at("application")
       .loadOrThrow[TicketsConfiguration]
 
-    val ticketsApi = new TicketsServiceApi()
+
+
+    val kafka = new TicketsKafkaProducer(configuration.kafka)
+    val repo = new TicketsRepo()
+    val elastic = new TicketsElasticRepo(configuration.elasticsearch)
+    val projects = new ProjectsServiceClient(configuration.projects)
+    val service = new TicketsService(repo, elastic, kafka)
+    val api = new TicketsServiceApi(service)
 
     val binding = Http()
       .newServerAt(configuration.application.host, configuration.application.port)
-      .bind(ticketsApi.route)
+      .bind(api.route)
 
 
     val shutdown = CoordinatedShutdown(system)

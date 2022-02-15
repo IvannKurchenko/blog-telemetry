@@ -42,6 +42,8 @@ object Dependencies {
       "com.sksamuel.elastic4s" %% "elastic4s-json-circe" % "7.17.0",
 
       "org.apache.kafka" %% "kafka" % "3.1.0",
+      "org.apache.kafka" % "kafka-clients" % "3.1.0",
+      "io.confluent" % "kafka-json-serializer" % "7.0.0",
 
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4",
       "ch.qos.logback" % "logback-classic" % "1.2.10"

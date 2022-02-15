@@ -12,7 +12,7 @@ class TicketsRepo(implicit ec: ExecutionContext) {
   private val db = Database.forConfig("postgre")
   private val ticketsTable = TableQuery[TicketsTable]
 
-  def init = {
+  def init: Future[Unit] = {
     val init =
       TableMigration(ticketsTable)
         .create
@@ -25,21 +25,19 @@ class TicketsRepo(implicit ec: ExecutionContext) {
     db.run(migration())
   }
 
+  def getByIds(ids: Set[Long]): Future[List[Ticket]] = {
+    db.run(ticketsTable.filter(_.id inSet ids).result.map(_.toList))
+  }
+
   def getById(id: Long): Future[Option[Ticket]] = {
     db.run(ticketsTable.filter(_.id === id).result.headOption)
   }
 
-  def create(create: CreateTicket): Future[Ticket] = {
-    val ticket = Ticket(
-      id = -1,
-      project = create.project,
-      title = create.title,
-      description = create.description,
-      createdAt = System.currentTimeMillis(),
-      createdBy = create.creator,
-      modifiedAt = System.currentTimeMillis(),
-      modifiedBy = create.creator,
-    )
+  def getAll: Future[List[Ticket]] = {
+    db.run(ticketsTable.result.map(_.toList))
+  }
+
+  def create(ticket: Ticket): Future[Ticket] = {
     db.run(ticketsTable returning ticketsTable.map(_.id) into ((ticket, id) => ticket.copy(id=id)) += ticket)
   }
 
