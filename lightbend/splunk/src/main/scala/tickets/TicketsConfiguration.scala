@@ -2,7 +2,7 @@ package tickets
 
 case class ElasticsearchConfiguration(url: String)
 
-case class PostgreConfiguration()
+case class PostgreConfiguration(url: String)
 
 case class KafkaConfiguration(url: String, topic: String)
 

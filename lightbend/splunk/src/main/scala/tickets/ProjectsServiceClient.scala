@@ -1,6 +1,6 @@
 package tickets
 
-import akka.actor.ActorSystem
+import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
@@ -10,7 +10,7 @@ import io.circe.generic.auto._
 import scala.concurrent.{ExecutionContext, Future}
 
 class ProjectsServiceClient(configuration: ProjectsServiceConfiguration)
-                           (implicit system: ActorSystem, ec: ExecutionContext) {
+                           (implicit system: ActorSystem[Nothing], ec: ExecutionContext) {
 
   def findProject(id: Long): Future[Option[Project]] = {
     Http().singleRequest(HttpRequest(uri = s"${configuration.url}/projects/$id")).flatMap { response =>

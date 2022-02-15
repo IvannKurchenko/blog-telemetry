@@ -1,29 +1,14 @@
 package tickets
 
 import slick.jdbc.PostgresProfile.api._
-import slick.migration.api._
 import tickets.TicketsRepo.TicketsTable
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class TicketsRepo(implicit ec: ExecutionContext) {
 
-  private implicit val postgresDialect: PostgresDialect = new PostgresDialect
   private val db = Database.forConfig("postgre")
   private val ticketsTable = TableQuery[TicketsTable]
-
-  def init: Future[Unit] = {
-    val init =
-      TableMigration(ticketsTable)
-        .create
-        .addColumns(_.id, _.project, _.title, _.description, _.createdAt, _.createdBy, _.modifiedAt, _.modifiedBy)
-
-    val seed =
-      SqlMigration("Create tickets table")
-
-    val migration = init & seed
-    db.run(migration())
-  }
 
   def getByIds(ids: Set[Long]): Future[List[Ticket]] = {
     db.run(ticketsTable.filter(_.id inSet ids).result.map(_.toList))

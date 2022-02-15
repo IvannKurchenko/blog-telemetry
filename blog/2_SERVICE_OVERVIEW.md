@@ -24,7 +24,7 @@ We will focus on tickets service monitoring
 ### `tickets-service` API
 <br>`GET /v1/tickets?search={search-query}&project={}` - performs full text search over all tickets
 <br>`POST /v1/tickets` - create single ticket
-<br>`PUT /v1/tickets/:id` - update single ticket
+<br>`PUT /v1/tickets` - update single ticket
 <br>`DELETE /v1/tickets/:id` - delete single ticket
 
 Example ticket model is following: 

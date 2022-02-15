@@ -59,14 +59,14 @@ class TicketsService(repo: TicketsRepo,
     } yield updated
   }
 
-  def delete(id: Long): Future[Unit] = {
+  def delete(id: Long): Future[Boolean] = {
     for {
-      _ <- repo.delete(id)
+      count <- repo.delete(id)
       _ <- elastic.deleteTicket(id)
-    } yield ()
+    } yield count > 0
   }
 
-  private def verifyProject(project: Long) = {
+  private def verifyProject(project: Long): Future[Unit] = {
     for {
       project <- projects.findProject(project)
       _ <- project.fold(Future.failed[Unit](new Exception(s"No project found: $project"))) { _ =>

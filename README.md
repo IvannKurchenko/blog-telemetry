@@ -21,7 +21,7 @@ sbt projects_service/docker:publishLocal
 
 Run environment using docker compose:
 ```
-docker-compose up -d
+docker-compose -f docker/environment-docker-compose.yml up -d
 ```
 
 Then run tickets service on particular stack and using particular telemetry, for instance:
@@ -38,5 +38,5 @@ Check target APM or any monitoring tool and verify telemetry has been sent.
 
 Stop environment using docker compose:
 ```
-docker-compose down
+docker-compose -f docker/environment-docker-compose.yml down
 ```

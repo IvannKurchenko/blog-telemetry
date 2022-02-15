@@ -35,8 +35,8 @@ object Dependencies {
 
       "com.typesafe.slick" %% "slick" % "3.3.3",
       "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3",
-      "org.postgresql" % "postgresql" % "9.4-1206-jdbc42",
-      "io.github.nafg.slick-migration-api" %% "slick-migration-api" % "0.8.2",
+      "org.postgresql" % "postgresql" % "42.2.24",
+      "org.flywaydb" % "flyway-core" % "8.5.0",
 
       "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % "7.17.0",
       "com.sksamuel.elastic4s" %% "elastic4s-json-circe" % "7.17.0",
