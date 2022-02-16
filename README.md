@@ -1,19 +1,30 @@
 # Blog: Telemetry in Scala
 
-# Blog
+## Blog
 This repository contains source code for "Telemetry in Scala" blog series. 
 
-# Structure
-Source code subprojects organised using following way: `{stack-name}/{monitoring-system}`
-In particular:
+## Layout
+
+### Subprojects
+Main source code divided on following subprojects:
 ```
+/ projects_service - stub projects service
 / load_testing - Gatling tests to simulate user traffic
 / lightbend - System implementation using mostly "Lightbend" stack: akka, slick.
     / splunk - using Splunk APM for as main monitoring tool
     / sentry - using Sentry APM for as main monitoring tool
 ```
 
-# How to run
+### Misc
+Apart from source code current repo has the following folders:
+```
+blog - blog post
+docker - various docker compose  
+```
+
+## How to run
+In order to run system 
+
 Build necessary docker containers:
 ```
 sbt projects_service/docker:publishLocal
@@ -26,7 +37,7 @@ docker-compose -f docker/environment-docker-compose.yml up -d
 
 Then run tickets service on particular stack and using particular telemetry, for instance:
 ```
-TODO
+sbt run lightbend/splunk
 ```
 
 After, run load testing to simulate user traffic 
@@ -40,3 +51,9 @@ Stop environment using docker compose:
 ```
 docker-compose -f docker/environment-docker-compose.yml down
 ```
+
+## APM 
+
+### Splunk
+In order to use Splunk APM locally, use `docker/splunk-apm-docker-compose.yml` docker-compose.
+Replace `SPLUNK_ACCESS_TOKEN` and `SPLUNK_REALM` with yours and  run agent before app launch.
