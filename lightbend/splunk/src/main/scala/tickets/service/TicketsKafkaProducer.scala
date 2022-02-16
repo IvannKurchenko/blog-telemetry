@@ -1,8 +1,10 @@
-package tickets
+package tickets.service
 
 import io.confluent.kafka.serializers.KafkaJsonSerializer
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
 import org.apache.kafka.common.serialization.StringSerializer
+import tickets.KafkaConfiguration
+import tickets.model.{Ticket, TicketEvent}
 
 import java.util.Properties
 import scala.concurrent.{ExecutionContext, Future}

@@ -10,6 +10,7 @@ import com.typesafe.scalalogging.LazyLogging
 import org.flywaydb.core.Flyway
 import pureconfig._
 import pureconfig.generic.auto._
+import tickets.service._
 
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,8 +26,8 @@ object TicketsServiceApplication extends LazyLogging {
     val configuration = ConfigSource.default.loadOrThrow[TicketsConfiguration]
 
     val kafka = new TicketsKafkaProducer(configuration.kafka)
-    val repo = new TicketsRepo()
-    val elastic = new TicketsElasticRepo(configuration.elasticsearch)
+    val repo = new TicketsPostgreRepository()
+    val elastic = new TicketsElasticRepository(configuration.elasticsearch)
     val projects = new ProjectsServiceClient(configuration.projects)
     val service = new TicketsService(repo, elastic, kafka, projects)
     val api = new TicketsServiceApi(service)

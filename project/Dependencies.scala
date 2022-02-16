@@ -55,7 +55,10 @@ object Dependencies {
   lazy val gatling = {
     Seq(
       "io.gatling" % "gatling-core" % "3.7.4",
-      "io.gatling" % "gatling-test-framework" % "3.7.4"
+      "io.gatling" % "gatling-test-framework" % "3.7.4",
+      "io.gatling.highcharts" % "gatling-charts-highcharts" % "3.7.4"
     )
   }
+
+  lazy val loadTesting = circe ++ gatling
 }

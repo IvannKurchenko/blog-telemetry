@@ -31,7 +31,7 @@ TODO
 
 After, run load testing to simulate user traffic 
 ```
-TODO
+sbt Gatling/test
 ```
 
 Check target APM or any monitoring tool and verify telemetry has been sent. 

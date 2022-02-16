@@ -1,4 +1,4 @@
-package tickets
+package tickets.model
 
 case class Project(id: Long,
                    name: String,

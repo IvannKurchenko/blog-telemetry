@@ -1,4 +1,4 @@
-package tickets
+package tickets.service
 
 import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.Http
@@ -6,6 +6,8 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
 import io.circe.generic.auto._
+import tickets.ProjectsServiceConfiguration
+import tickets.model.Project
 
 import scala.concurrent.{ExecutionContext, Future}
 

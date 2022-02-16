@@ -4,9 +4,10 @@ version := "0.1"
 
 lazy val load_testing =
   (project in file("load_testing")).
+    enablePlugins(GatlingPlugin).
     settings(
       scalaVersion := "2.13.1",
-      libraryDependencies := Dependencies.gatling
+      libraryDependencies := Dependencies.loadTesting
     )
 
 lazy val projects_service =

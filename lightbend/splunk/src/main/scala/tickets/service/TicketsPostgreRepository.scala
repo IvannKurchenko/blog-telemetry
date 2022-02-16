@@ -1,11 +1,12 @@
-package tickets
+package tickets.service
 
 import slick.jdbc.PostgresProfile.api._
-import tickets.TicketsRepo.TicketsTable
+import tickets.model.Ticket
+import tickets.service.TicketsPostgreRepository.TicketsTable
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TicketsRepo(implicit ec: ExecutionContext) {
+class TicketsPostgreRepository(implicit ec: ExecutionContext) {
 
   private val db = Database.forConfig("postgre")
   private val ticketsTable = TableQuery[TicketsTable]
@@ -35,7 +36,7 @@ class TicketsRepo(implicit ec: ExecutionContext) {
   }
 }
 
-object TicketsRepo {
+object TicketsPostgreRepository {
   class TicketsTable(tag: Tag) extends Table[Ticket](tag, "tickets") {
     val id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     val project = column[Long]("project")
@@ -45,7 +46,8 @@ object TicketsRepo {
     val createdBy = column[String]("created_by")
     val modifiedAt = column[Long]("modified_at")
     val modifiedBy = column[String]("modified_by")
-    def * =
+    def * = {
       (id, project, title, description, createdAt, createdBy, modifiedAt, modifiedBy).mapTo[Ticket]
+    }
   }
 }

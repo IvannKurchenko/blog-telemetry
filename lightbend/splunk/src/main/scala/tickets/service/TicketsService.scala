@@ -1,12 +1,15 @@
-package tickets
+package tickets.service
+
+import com.typesafe.scalalogging.LazyLogging
+import tickets.model.{CreateTicket, Ticket, UpdateTicket}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TicketsService(repo: TicketsRepo,
-                     elastic: TicketsElasticRepo,
+class TicketsService(postgre: TicketsPostgreRepository,
+                     elastic: TicketsElasticRepository,
                      kafka: TicketsKafkaProducer,
                      projects: ProjectsServiceClient)
-                    (implicit ec: ExecutionContext) {
+                    (implicit ec: ExecutionContext) extends LazyLogging{
 
 
   def createTicket(create: CreateTicket): Future[Ticket] = {
@@ -21,25 +24,30 @@ class TicketsService(repo: TicketsRepo,
       modifiedBy = create.creator,
     )
 
+    logger.info(s"Creating ticket: $ticket")
     for {
       _ <- verifyProject(ticket.project)
-      ticket <- repo.create(ticket)
+      ticket <- postgre.create(ticket)
       _ <- elastic.indexTicket(ticket)
       _ <- kafka.sendCreated(ticket)
-    } yield ticket
+    } yield {
+      logger.info(s"Created ticket: $ticket")
+      ticket
+    }
   }
 
   def searchTickets(query: Option[String], project: Option[Long]): Future[List[Ticket]] = {
     for {
       foundTickets <- elastic.searchTickets(query, project)
-      tickets <- repo.getByIds(foundTickets.map(_.id).toSet)
+      tickets <- postgre.getByIds(foundTickets.map(_.id).toSet)
     } yield tickets
   }
 
   def update(update: UpdateTicket): Future[Option[Ticket]] = {
+    logger.info(s"Updating ticket: $update")
     for {
       _ <- verifyProject(update.project)
-      existing <- repo.getById(update.id)
+      existing <- postgre.getById(update.id)
       updated = existing.map(
         _.copy(
           project = update.project,
@@ -51,17 +59,20 @@ class TicketsService(repo: TicketsRepo,
       )
       _ <- updated.fold(Future.successful()) { ticket =>
         for {
-          _ <- repo.update(ticket)
+          _ <- postgre.update(ticket)
           _ <- elastic.indexTicket(ticket)
           _ <- kafka.sendUpdated(ticket)
         } yield ()
       }
-    } yield updated
+    } yield {
+      logger.info(s"Updated ticket: $updated")
+      updated
+    }
   }
 
   def delete(id: Long): Future[Boolean] = {
     for {
-      count <- repo.delete(id)
+      count <- postgre.delete(id)
       _ <- elastic.deleteTicket(id)
     } yield count > 0
   }
