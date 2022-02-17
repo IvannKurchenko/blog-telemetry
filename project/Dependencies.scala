@@ -52,6 +52,13 @@ object Dependencies {
 
   lazy val lightbend = lightbendSpecific ++ common
 
+  lazy val openTelemetry = {
+    Seq(
+      "io.opentelemetry" % "opentelemetry-bom" % "1.11.0" pomOnly(),
+      "io.opentelemetry" % "opentelemetry-api" % "1.11.0",
+    )
+  }
+
   lazy val gatling = {
     Seq(
       "io.gatling" % "gatling-core" % "3.7.4",

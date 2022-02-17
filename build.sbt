@@ -12,8 +12,7 @@ lazy val load_testing =
 
 lazy val projects_service =
   (project in file("projects_service")).
-    enablePlugins(JavaAppPackaging).
-    enablePlugins(DockerPlugin).
+    enablePlugins(JavaAppPackaging, DockerPlugin).
     settings(
       scalaVersion := "2.13.1",
       resolvers += "confluent" at "https://packages.confluent.io/maven/",
@@ -23,20 +22,13 @@ lazy val projects_service =
       Docker / version := "latest"
     )
 
-lazy val lightbend_splunk =
-  (project in file("lightbend/splunk")).
-    enablePlugins(DockerPlugin).
+lazy val opentelemetry =
+  (project in file("opentelemetry")).
+    enablePlugins(JavaAgent, JavaAppPackaging, DockerPlugin).
     settings(
       scalaVersion := "2.13.1",
       resolvers += "confluent" at "https://packages.confluent.io/maven/",
-      libraryDependencies := Dependencies.lightbend
+      libraryDependencies := Dependencies.lightbend,
+      javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.11.0"
     )
 
-lazy val lightbend_sentry =
-  (project in file("lightbend/sentry")).
-    enablePlugins(DockerPlugin).
-    settings(
-      scalaVersion := "2.13.1",
-      resolvers += "confluent" at "https://packages.confluent.io/maven/",
-      libraryDependencies := Dependencies.lightbend
-    )

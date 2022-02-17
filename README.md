@@ -10,9 +10,7 @@ Main source code divided on following subprojects:
 ```
 / projects_service - stub projects service
 / load_testing - Gatling tests to simulate user traffic
-/ lightbend - System implementation using mostly "Lightbend" stack: akka, slick.
-    / splunk - using Splunk APM for as main monitoring tool
-    / sentry - using Sentry APM for as main monitoring tool
+/ opentelemetry - System implementation using mostly "Lightbend" stack: akka, slick and Opentelemetry for instrumentation.
 ```
 
 ### Misc

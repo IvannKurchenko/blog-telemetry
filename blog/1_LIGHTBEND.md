@@ -1,6 +1,9 @@
-## Intro
-This series of articles aimed to show landscape of telemetry and APM solutions possible to use in different
-Scala ecosystems or stacks if you will. I possibly won't cover all of them, but will try to cover main one.
+# Monitoring with Scala: OpenTelemetry and Lightbend
+
+## Introduction
+This series of articles aimed to show landscape of metrics, telemetry and APM solutions possible to use in different
+Scala ecosystems or stacks if you will. I possibly won't cover all of them in details, but will try to cover main one.
+
 Please, NOTE: this series is not going to compare APM as whole products between each other, instead it focuses on
 how to use each APM product in different Scala ecosystem and perhaps highlight some pitfalls from this perspective only.
 
@@ -13,22 +16,14 @@ Following ecosystems are going to be considered:
 
 In this particular post, let's call it "Part 1", I will focus on `Lightbend` stack first.
 
-## Telemetry and APM products
-Following telemetry and APM solutions are considered:
-- [Splunk APM](https://www.splunk.com/en_us/observability/apm-application-performance-monitoring.html);
-- [Sentry APM](https://sentry.io/for/performance);
-- [Datadog](https://www.datadoghq.com);
-- Grafana - self-hosted Grafana application backed by some metrics store, such as InfluxDB;
-
 ### System under monitoring
-In order to compare how to plug and use certain APM products to end-service, let's consider single example service.
-Let it be, task ticketing system, similar to well know Jira or Asana. Domain model is pretty simple - there is `Ticket`
+In order to compare how to plug and use certain telemetry solutions for end-service, let's consider single example service.
+Let it be, task ticketing system, similar to well known Jira or Asana. Domain model is pretty simple - there is `Ticket`
 representing single task and `Project` which contains multiple tickets.
 This system at high level, consist of microservices responsible for projects management (`projects-service`),
 tickets management (`tickets-service`) and tickets change notifications, e.g. emails (`notification-service`).
 Since there are plenty of stuff to monitor, let's keep our focus on `tickets-service` - the abstract service we are going
 to monitor
-
 
 For the sake example, task tickets system is much simplified comparing to real world production system and
 does not include auth, caching, some services are stubbed at all.
@@ -85,36 +80,62 @@ underlying effect, hence can be used with `Future`, which is our case.
 - `kafka` - plain Java client to write records to `tickets`. Since, we don't need to read and process messages,
 `akka-streams` is not used here.
 
-## Splunk APM
-![](images/lightbend-splunk.drawio.png)
+## Glossary 
+metric, span/trace etc, instrumentation.
+
+## What to monitor
+For sake of example let's suppose we would like 
+
+- Trace requests performance
+- Custom metric: number of tickets
+
+## Instrumentation
+We are gioing Instrumentation: OpenTelemetry and Kamon
+
+## OpenTelemetry
+![](images/lightbend-opentelemetry.drawio.png)
+
+Tracing: Zipking and Jaeger
+Metrics: InfluxDB and Prometheus
+APM:
+- [Splunk APM](https://www.splunk.com/en_us/observability/apm-application-performance-monitoring.html);
+- [Datadog](https://www.datadoghq.com);
+- Grafana - self-hosted Grafana application backed by some metrics store, such as InfluxDB;
 
 Splunk APM product natively supports [OpenTelemetry](https://opentelemetry.io) for instrumentation.
 Unfortunately, it has no dedicated support for variety of Scala libraries, but luckily it some supports plenty
-instrumentation for plenty of JVM libs. For ticket-service case, following instrumentation is considered:
-- [Akka HTTP](https://doc.akka.io/docs/akka-http/current/index.html)
-- [JDBC](https://docs.oracle.com/javase/8/docs/api/java/sql/package-summary.html)
-- [Elasticsearch Client](https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/index.html)
-- [Kafka Producer/Consumer API](https://kafka.apache.org/documentation/#producerapi)
+instrumentation for plenty of JVM libs. In particular for `ticket-service` case, we are interested about following instrumentation:
+"Akka HTTP", "JDBC", "Elasticsearch Client", "Kafka Producer/Consumer API"
 
 _Despite the fact list pretty long, I strongly encourage you to check if it fits your particular needs._
+
+OpenTelemetry has nice documentation [how to plug automatic instrumentation](https://opentelemetry.io/docs/instrumentation/java/automatic/)
+Taking into account sbt specifics, it is possible to do with following way:
+[sbt-javaagent](https://github.com/sbt/sbt-javaagent) - use plugin to run app with `javaagent` parameter
+Add to `plugin.sbt`
+```scala
+addSbtPlugin("com.lightbend.sbt" % "sbt-javaagent" % "0.1.6")
+```
+And add following line for project settings:
+```scala
+javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.11.0"
+```
 
 TODO:
 how to plug
 telemetry results (screenshot?)
 Conclusion: pros and cons.
 
+### Datadog
+
+### Grafana
+
 Links:
+- [Getting Started With OpenTelemetry](https://dzone.com/refcardz/getting-started-with-opentelemetry)
 - [OpenTelemetry JVM instrumentation](https://opentelemetry.io/docs/instrumentation/java/)
 - [OpenTelemetry supported JVM libraries](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md)
-- [Splunk APM agent docker instalation](https://docs.splunk.com/Observability/gdi/opentelemetry/install-linux.html#linux-docker)
+- [Splunk APM agent docker installation](https://docs.splunk.com/Observability/gdi/opentelemetry/install-linux.html#linux-docker)
 
-
-## Sentry APM
-![](images/lightbend-sentry.drawio.png)
-TODO :
-SENTRy APM + Kamon: Overview, how to plug, pros/cons, conclusion
-
-
-## Datadog
-TODO :
-Datadog APM + Kamon
+## conclusion
+Choose APM or Telemetry tool based on your infra, it should not be limited only to single eco-system.
+Next - Typelevel
