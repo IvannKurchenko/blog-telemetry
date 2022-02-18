@@ -28,7 +28,7 @@ class TicketsPostgreRepository(implicit ec: ExecutionContext) {
   }
 
   def update(ticket: Ticket): Future[Int] = {
-    db.run(ticketsTable.update(ticket))
+    db.run(ticketsTable.insertOrUpdate(ticket))
   }
 
   def delete(id: Long): Future[Int] = {

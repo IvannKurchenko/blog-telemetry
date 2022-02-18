@@ -1,20 +1,23 @@
-# Service environment
-version: '3.1'
-
+# Docker compose to run tickets service, environment for it and prometheus agent
+# Run with following command: docker-compose -f docker-compose/opentelemetry-prometheus-docker-compose.yml up -d
+# Stop with following command: docker-compose -f docker-compose/opentelemetry-prometheus-docker-compose.yml down
+# After start open http://localhost:9090 to verify Prometheus is up and running
+version: "3"
 services:
-
   projects_service:
     image: projects_service
     container_name: projects_service
+    hostname: projects_service
     restart: always
     networks:
-        - tickets
+      - tickets
     ports:
       - "10000:10000"
 
   postgres:
     image: postgres:14.1
     container_name: postgres
+    hostname: postgres
     restart: always
     networks:
       - tickets
@@ -28,7 +31,10 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
     container_name: elasticsearch
+    hostname: elasticsearch
     restart: always
+    networks:
+      - tickets
     environment:
       - "xpack.security.enabled=false"
       - "discovery.type=single-node"
@@ -81,6 +87,36 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  prometheus:
+    build: docker-prometheus
+    container_name: prometheus
+    hostname: prometheus
+    restart: always
+    networks:
+      - tickets
+    ports:
+      - "9090:9090"
+
+  tickets_service:
+    image: tickets_service_otel
+    container_name: tickets_service_otel
+    hostname: tickets_service
+    restart: always
+    environment:
+      - OTEL_METRICS_EXPORTER=prometheus
+      - OTEL_EXPORTER_PROMETHEUS_PORT=9094
+      - OTEL_EXPORTER_PROMETHEUS_HOST=0.0.0.0
+      - APPLICATION_ELASTICSEARCH_URL=http://elasticsearch:9200
+      - APPLICATION_POSTGRE_URL=jdbc:postgresql://postgres:5432/tickets?user=tickets_user&password=tickets_password
+      - APPLICATION_POSTGRE_HOST=postgres
+      - APPLICATION_KAFKA_URL=kafka-1:9092
+      - APPLICATION_PROJECTS_URL=http://projects_service:10000
+    networks:
+      - tickets
+    ports:
+      - "10001:10001"
+      - "9094:9094"
 
 networks:
   tickets:

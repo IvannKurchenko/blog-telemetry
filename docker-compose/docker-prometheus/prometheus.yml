@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 5s
+  external_labels:
+    monitor: 'global-monitor'
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  - job_name: 'tickets-service'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['tickets_service:9094']

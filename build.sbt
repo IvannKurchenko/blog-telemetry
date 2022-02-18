@@ -28,7 +28,11 @@ lazy val opentelemetry =
     settings(
       scalaVersion := "2.13.1",
       resolvers += "confluent" at "https://packages.confluent.io/maven/",
-      libraryDependencies := Dependencies.lightbend,
-      javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.11.0"
-    )
+      libraryDependencies := Dependencies.openTelemetry,
+      javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.11.0",
+      mainClass := Some("tickets.TicketsServiceApplication"),
 
+      dockerExposedPorts := Seq(10000),
+      Docker / packageName  := "tickets_service_otel",
+      Docker / version := "latest"
+    )

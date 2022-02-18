@@ -26,16 +26,12 @@ In order to run system
 Build necessary docker containers:
 ```
 sbt projects_service/docker:publishLocal
+sbt opentelemetry/docker:publishLocal
 ```
 
-Run environment using docker compose:
+Run specific system setup using docker compose. For instance :
 ```
-docker-compose -f docker/environment-docker-compose.yml up -d
-```
-
-Then run tickets service on particular stack and using particular telemetry, for instance:
-```
-sbt run lightbend/splunk
+docker-compose -f docker-compose/opentelemetry-prometheus-docker-compose.yml up -d
 ```
 
 After, run load testing to simulate user traffic 
@@ -47,11 +43,5 @@ Check target APM or any monitoring tool and verify telemetry has been sent.
 
 Stop environment using docker compose:
 ```
-docker-compose -f docker/environment-docker-compose.yml down
+docker-compose -f docker-compose/opentelemetry-prometheus-docker-compose.yml down
 ```
-
-## APM 
-
-### Splunk
-In order to use Splunk APM locally, use `docker/splunk-apm-docker-compose.yml` docker-compose.
-Replace `SPLUNK_ACCESS_TOKEN` and `SPLUNK_REALM` with yours and  run agent before app launch.

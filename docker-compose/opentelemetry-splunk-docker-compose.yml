@@ -1,6 +1,7 @@
 # See for more details: https://docs.splunk.com/Observability/gdi/opentelemetry/install-linux.html#docker
-# Run with following command: docker-compose -f docker/splunk-apm-docker-compose.yml up -d
-# Stop with following command: docker-compose -f docker/splunk-apm-docker-compose.yml down
+# NOTE: Replace `SPLUNK_ACCESS_TOKEN` and `SPLUNK_REALM` with yours and  run agent before app launch.
+# Run with following command: docker-compose -f docker-compose/opentelemetry-splunk-docker-compose.yml up -d
+# Stop with following command: docker-compose -f docker-compose/opentelemetry-splunk-docker-compose.yml down
 version: "3"
 services:
   splunk-otel-collector:

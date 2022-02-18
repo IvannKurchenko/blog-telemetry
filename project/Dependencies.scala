@@ -50,14 +50,25 @@ object Dependencies {
     )
   }
 
-  lazy val lightbend = lightbendSpecific ++ common
-
-  lazy val openTelemetry = {
+  lazy val openTelemetrySpecific = {
+    val version = "1.11.0"
+    val alphaVersion =  s"$version-alpha"
     Seq(
-      "io.opentelemetry" % "opentelemetry-bom" % "1.11.0" pomOnly(),
-      "io.opentelemetry" % "opentelemetry-api" % "1.11.0",
+      "io.opentelemetry" % "opentelemetry-bom" % version pomOnly(),
+      "io.opentelemetry" % "opentelemetry-api" % version,
+      "io.opentelemetry" % "opentelemetry-sdk" % version,
+      "io.opentelemetry" % "opentelemetry-exporter-jaeger" % version,
+      "io.opentelemetry" % "opentelemetry-sdk-extension-autoconfigure" % alphaVersion,
+      "io.opentelemetry" % "opentelemetry-exporter-prometheus" % alphaVersion,
+      "io.opentelemetry" % "opentelemetry-exporter-zipkin" % version,
+      "io.opentelemetry" % "opentelemetry-exporter-jaeger" % version,
+      "io.opentelemetry" % "opentelemetry-exporter-otlp" % version
     )
   }
+
+  lazy val openTelemetry = openTelemetrySpecific ++ lightbendSpecific ++ common
+
+  lazy val lightbend = lightbendSpecific ++ common
 
   lazy val gatling = {
     Seq(

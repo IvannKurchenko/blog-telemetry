@@ -2,35 +2,18 @@ package tickets
 
 import akka.Done
 import akka.actor.CoordinatedShutdown
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
-import akka.stream.Materializer
 import com.typesafe.scalalogging.LazyLogging
 import org.flywaydb.core.Flyway
-import pureconfig._
-import pureconfig.generic.auto._
-import tickets.service._
 
-import java.util.concurrent.Executors
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 object TicketsServiceApplication extends LazyLogging {
   def main(args: Array[String]): Unit = {
-    implicit val system = ActorSystem(Behaviors.empty, "application-system")
-    implicit val executionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
-    implicit val materializer = Materializer(system)
-
-    val configuration = ConfigSource.default.loadOrThrow[TicketsConfiguration]
-
-    val kafka = new TicketsKafkaProducer(configuration.kafka)
-    val repo = new TicketsPostgreRepository()
-    val elastic = new TicketsElasticRepository(configuration.elasticsearch)
-    val projects = new ProjectsServiceClient(configuration.projects)
-    val service = new TicketsService(repo, elastic, kafka, projects)
-    val api = new TicketsServiceApi(service)
+    val module = new TicketsServiceModule()
+    import module._
 
     logger.info("Initializing application")
 

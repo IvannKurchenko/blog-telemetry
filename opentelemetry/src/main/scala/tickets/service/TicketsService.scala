@@ -1,6 +1,7 @@
 package tickets.service
 
 import com.typesafe.scalalogging.LazyLogging
+import io.opentelemetry.api.metrics.LongCounter
 import tickets.model.{CreateTicket, Ticket, UpdateTicket}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -8,7 +9,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class TicketsService(postgre: TicketsPostgreRepository,
                      elastic: TicketsElasticRepository,
                      kafka: TicketsKafkaProducer,
-                     projects: ProjectsServiceClient)
+                     projects: ProjectsServiceClient,
+                     ticketsCounter: LongCounter)
                     (implicit ec: ExecutionContext) extends LazyLogging{
 
 
@@ -30,6 +32,7 @@ class TicketsService(postgre: TicketsPostgreRepository,
       ticket <- postgre.create(ticket)
       _ <- elastic.indexTicket(ticket)
       _ <- kafka.sendCreated(ticket)
+      _ <- Future(ticketsCounter.add(1))
     } yield {
       logger.info(s"Created ticket: $ticket")
       ticket
@@ -74,6 +77,7 @@ class TicketsService(postgre: TicketsPostgreRepository,
     for {
       count <- postgre.delete(id)
       _ <- elastic.deleteTicket(id)
+      _ <- Future(ticketsCounter.add(-1))
     } yield count > 0
   }
 
