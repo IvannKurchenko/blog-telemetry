@@ -1,3 +1,5 @@
+import com.typesafe.sbt.packager.docker.DockerChmodType
+
 name := "blog-telemetry"
 version := "0.1"
 
@@ -29,10 +31,14 @@ lazy val opentelemetry =
       scalaVersion := "2.13.1",
       resolvers += "confluent" at "https://packages.confluent.io/maven/",
       libraryDependencies := Dependencies.openTelemetry,
+
       javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.11.0",
+      javaOptions += "-Dotel.javaagent.debug=true",
+
       mainClass := Some("tickets.TicketsServiceApplication"),
 
       dockerExposedPorts := Seq(10000),
       Docker / packageName  := "tickets_service_otel",
-      Docker / version := "latest"
+      Docker / version := "latest",
+      Docker / dockerChmodType := DockerChmodType.UserGroupWriteExecute
     )

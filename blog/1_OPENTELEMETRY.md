@@ -134,7 +134,7 @@ Talking about APM solutions, there are number of services natively supporting Op
 ### Automatic instrumentation
 OpenTelemetry provides easy way [to plug automatic instrumentation](https://opentelemetry.io/docs/instrumentation/java/automatic/)
 Taking into account `sbt` specifics, it is possible to do with following way:
-Add OpenTelemetry dependendices to the project:
+Add OpenTelemetry dependencies to the project:
 ```scala
 lazy val openTelemetrySpecific = {
   val version = "1.11.0"
@@ -190,36 +190,60 @@ ticketsCounter.add(1)
 Now we have plugged instrumentation and custom metrics for `ticket-service`.
 Full service implementation you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/tree/main/opentelemetry)
 
-### Metrics only example: Prometheus + Grafana
-Since, OpenTelemetry supports integration with Prometheus for metrics exporting, we can use it to monitor tickets count.
-Let's start local prometheus instance using following `docker-compose`:
+### Metrics example: Prometheus + Grafana
+Since, OpenTelemetry supports integration with Prometheus for metrics exporting, we can use it to monitor `tickets_count`.
+Let's start local prometheus instance using `docker-compose` (partial example):
 ```yaml
-version: "3"
-services:
-  prometheus:
-    image: prom/prometheus:v2.33.3
-    container_name: prometheus
-    restart: always
-    ports:
-      - "9090:9090"
+prometheus:
+  image: prom/prometheus:v2.33.3
+  container_name: prometheus
+  restart: always
+  ports:
+    - "9090:9090"
 ```
 
-Set necessary environment variables for `ticket-service` (see, [link](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#prometheus-exporter) for more details)  
+Set necessary environment variables for `ticket-service` for prometheus exporter (see, [link](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#prometheus-exporter) for more details)  
 
 ```shell
-export OTEL_METRICS_EXPORTER=prometheus
-export OTEL_EXPORTER_PROMETHEUS_PORT=9094
-export OTEL_EXPORTER_PROMETHEUS_HOST=0.0.0.0
+OTEL_METRICS_EXPORTER=prometheus
+OTEL_EXPORTER_PROMETHEUS_PORT=9094
+OTEL_EXPORTER_PROMETHEUS_HOST=0.0.0.0
 ```
 
 Don't forget to expose `9094` port for `tickets-service` for Prometheus agent to scrap metrics.
 
-Let's start whole setup and run Gatling tests after. At Prometheus UI we can find `tickets_count` metric:
+Let's start whole setup and run Gatling tests after. At Prometheus UI at `localhost:9090` we can find `tickets_count` metric:
 ![](images/screenshot_opentelemetry_prometheus.png)
 
 Full docker-compose you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/blob/main/docker-compose/opentelemetry-prometheus-docker-compose.yml).
 
-### Tracing only example: Zipkin
+### Tracing example: Zipkin
+As it was mentioned earlier, OpenTelemetry supports exporter for Zipkin, but this time for spans only.  
+
+Set necessary environment variables for `ticket-service` (see, [link](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#prometheus-exporter) for more details)
+Let's start local prometheus instance using following `docker-compose`:
+```yaml
+zipkin:
+    image: openzipkin/zipkin:2
+    hostname: zipkin
+    restart: always
+    networks:
+      - tickets
+    ports:
+      - "9411:9411"
+```
+
+Set necessary environment variables for `ticket-service` for zipkin exporter (see, [link](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#zipkin-exporter) for more details)
+
+```shell
+OTEL_TRACES_EXPORTER=zipkin
+OTEL_EXPORTER_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+```
+
+Let's start whole setup and run Gatling tests after. At Zipkin UI we can find `tickets_count` metric:
+![](images/screenshot_opentelemetry_zipkin.png)
+
+Full docker-compose you can find by [this link]().
 
 ### APM Example: Splunk 
 Splunk APM product natively supports [OpenTelemetry](https://opentelemetry.io) for instrumentation.

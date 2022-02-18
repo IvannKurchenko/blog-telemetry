@@ -62,7 +62,9 @@ object Dependencies {
       "io.opentelemetry" % "opentelemetry-exporter-prometheus" % alphaVersion,
       "io.opentelemetry" % "opentelemetry-exporter-zipkin" % version,
       "io.opentelemetry" % "opentelemetry-exporter-jaeger" % version,
-      "io.opentelemetry" % "opentelemetry-exporter-otlp" % version
+      "io.opentelemetry" % "opentelemetry-exporter-otlp" % version,
+
+      "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % version % "runtime"
     )
   }
 
