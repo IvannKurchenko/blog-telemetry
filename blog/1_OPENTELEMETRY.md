@@ -144,11 +144,15 @@ lazy val openTelemetrySpecific = {
     "io.opentelemetry" % "opentelemetry-api" % version,
     "io.opentelemetry" % "opentelemetry-sdk" % version,
     "io.opentelemetry" % "opentelemetry-exporter-jaeger" % version,
-    "io.opentelemetry" % "opentelemetry-sdk-extension-autoconfigure" % alphaVersion
+    "io.opentelemetry" % "opentelemetry-sdk-extension-autoconfigure" % alphaVersion,
+    "io.opentelemetry" % "opentelemetry-exporter-prometheus" % alphaVersion,
+    "io.opentelemetry" % "opentelemetry-exporter-zipkin" % version,
+    "io.opentelemetry" % "opentelemetry-exporter-jaeger" % version,
+    "io.opentelemetry" % "opentelemetry-exporter-otlp" % version,
+
+    "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % version % "runtime"
   )
 }
-
-libraryDependencies += openTelemetrySpecific
 ```
 
 Use [sbt-javaagent](https://github.com/sbt/sbt-javaagent) plugin to run app with `javaagent` parameter. Add to `plugin.sbt`:
@@ -158,7 +162,9 @@ addSbtPlugin("com.lightbend.sbt" % "sbt-javaagent" % "0.1.6")
 
 And add following line for project settings:
 ```scala
+libraryDependencies += openTelemetrySpecific
 javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.11.0"
+javaOptions += "-Dotel.javaagent.debug=true" //Debug OpenTelemetry Java agnet 
 ```
 
 Agent configuration can be supplied though environment variables or with Java options (e.g. `-D` argument).
@@ -172,11 +178,14 @@ Please, pay attention that:
 As it was said above: we want to track total number of tickets. First, let's instantiate counter for tickets:
 ```scala
 /*
- * `AutoConfiguredOpenTelemetrySdk` instantiate client based on provided environment variables or Java options
+ * `GlobalOpenTelemetry` singleton configured by OpenTelemetry Java agent, based environment variables or Java options
  */
-val sdk = AutoConfiguredOpenTelemetrySdk.initialize().getOpenTelemetrySdk
-val ticketsMeter: Meter = sdk.meterBuilder("tickets-service").build()
-val ticketsCounter: LongCounter = ticketsMeter
+import io.opentelemetry.api.metrics.{LongCounter, Meter}
+import io.opentelemetry.api.{GlobalOpenTelemetry, OpenTelemetry}
+
+lazy val sdk: OpenTelemetry = GlobalOpenTelemetry.get()
+lazy val ticketsMeter: Meter = sdk.meterBuilder("tickets-service").build()
+lazy val ticketsCounter: LongCounter = ticketsMeter
   .counterBuilder("tickets_count")
   .setDescription("Total number of tickets")
   .setUnit("1")
@@ -212,7 +221,7 @@ OTEL_EXPORTER_PROMETHEUS_HOST=0.0.0.0
 
 Don't forget to expose `9094` port for `tickets-service` for Prometheus agent to scrap metrics.
 
-Let's start whole setup and run Gatling tests after. At Prometheus UI at `localhost:9090` we can find `tickets_count` metric:
+Let's start whole setup and run Gatling tests after. On Prometheus UI at `localhost:9090` we can find `tickets_count` metric:
 ![](images/screenshot_opentelemetry_prometheus.png)
 
 Full docker-compose you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/blob/main/docker-compose/opentelemetry-prometheus-docker-compose.yml).
@@ -240,10 +249,13 @@ OTEL_TRACES_EXPORTER=zipkin
 OTEL_EXPORTER_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
 ```
 
-Let's start whole setup and run Gatling tests after. At Zipkin UI we can find `tickets_count` metric:
-![](images/screenshot_opentelemetry_zipkin.png)
+Let's start whole setup and run Gatling tests after. On Zipkin UI at `localhost:9411` we can find some `tickets_service` traces:
+![](images/screenshot_opentelemetry_zipkin_1.png)
 
-Full docker-compose you can find by [this link]().
+Which we expand, but unfortunately not many details could be found:
+![](images/screenshot_opentelemetry_zipkin_2.png)
+
+Full docker-compose you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/blob/main/docker-compose/opentelemetry-zipkin-docker-compose.yml).
 
 ### APM Example: Splunk 
 Splunk APM product natively supports [OpenTelemetry](https://opentelemetry.io) for instrumentation.
@@ -260,6 +272,8 @@ Pros:
 Cons:
 - Not that much natively supported Scala libraries;
 - Some dependencies with version `1.11.0` (latest at the moment of post) are still in `alpha`. E.g.:  [opentelemetry-sdk-extension-autoconfigure](https://mvnrepository.com/artifact/io.opentelemetry/opentelemetry-sdk-extension-autoconfigure/1.11.0-alpha)
+- Does not instrument akka application properly: can not connect spans. I assume because of it relies on 
+- Subjective: Runtime magic and not intuitive.
 
 ## Links
 - [Getting Started With OpenTelemetry](https://dzone.com/refcardz/getting-started-with-opentelemetry)

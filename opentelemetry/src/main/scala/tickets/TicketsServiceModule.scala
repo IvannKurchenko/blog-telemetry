@@ -4,7 +4,7 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.stream.Materializer
 import io.opentelemetry.api.metrics.{LongCounter, Meter}
-import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk
+import io.opentelemetry.api.{GlobalOpenTelemetry, OpenTelemetry}
 import pureconfig._
 import pureconfig.generic.auto._
 import tickets.service._
@@ -20,9 +20,9 @@ class TicketsServiceModule {
   lazy val configuration: TicketsConfiguration = ConfigSource.default.loadOrThrow[TicketsConfiguration]
 
   /*
-   * `AutoConfiguredOpenTelemetrySdk` instantiate client based on provided environment variables or Java options
+   * `GlobalOpenTelemetry` singleton configured by OpenTelemetry Java agent, based environment variables or Java options
    */
-  lazy val sdk = AutoConfiguredOpenTelemetrySdk.initialize().getOpenTelemetrySdk
+  lazy val sdk: OpenTelemetry = GlobalOpenTelemetry.get()
   lazy val ticketsMeter: Meter = sdk.meterBuilder("tickets-service").build()
   lazy val ticketsCounter: LongCounter = ticketsMeter
     .counterBuilder("tickets_count")
