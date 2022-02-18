@@ -188,6 +188,7 @@ Great, now we can utilize `ticketsCounter` to track number of tickets by inserti
 ticketsCounter.add(1)
 ```
 Now we have plugged instrumentation and custom metrics for `ticket-service`.
+Full service implementation you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/tree/main/opentelemetry)
 
 ### Metrics only example: Prometheus + Grafana
 Since, OpenTelemetry supports integration with Prometheus for metrics exporting, we can use it to monitor tickets count.
@@ -216,7 +217,7 @@ Don't forget to expose `9094` port for `tickets-service` for Prometheus agent to
 Let's start whole setup and run Gatling tests after. At Prometheus UI we can find `tickets_count` metric:
 ![](images/screenshot_opentelemetry_prometheus.png)
 
-Full docker-compose you can find by this link.
+Full docker-compose you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/blob/main/docker-compose/opentelemetry-prometheus-docker-compose.yml).
 
 ### Tracing only example: Zipkin
 
