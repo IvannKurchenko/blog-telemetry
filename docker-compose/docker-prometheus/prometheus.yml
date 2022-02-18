@@ -1,3 +1,4 @@
+# NOTE: Replace `SPLUNK_ACCESS_TOKEN` and `SPLUNK_REALM` with yours and  run agent before app launch.
 global:
   scrape_interval: 5s
   external_labels:

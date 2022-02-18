@@ -1,0 +1,30 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  batch:
+    timeout: 10s
+
+exporters:
+  datadog/api:
+    env: local
+    service: tickets-service
+    version: latest
+
+    api:
+      key: {DATADOG-API-KEY}
+      site: datadoghq.eu
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [datadog/api]
+    metrics:
+      receivers: [ otlp ]
+      processors: [ batch]
+      exporters: [ datadog/api ]

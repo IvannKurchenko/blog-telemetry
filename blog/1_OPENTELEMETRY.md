@@ -257,8 +257,14 @@ Which we expand, but unfortunately not many details could be found:
 
 Full docker-compose you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/blob/main/docker-compose/opentelemetry-zipkin-docker-compose.yml).
 
-### APM Example: Splunk 
-Splunk APM product natively supports [OpenTelemetry](https://opentelemetry.io) for instrumentation.
+### APM Example: Datadog 
+Create collector for Datadog with API key
+https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent
+
+
+Use OTLP exporter
+https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#otlp-exporter-span-metric-and-log-exporters
+
 
 
 
@@ -267,7 +273,13 @@ Choose APM or Telemetry tool based on your infra, it should not be limited only 
 Next - Kamon + Lightbend
 
 Pros:
-- Open standard with wide support among free and commercial monitoring solutions;
+- Open, vendor-agnostic standard with wide support among free and commercial monitoring solutions;
+  It is worth to highlight, that OpenTelemetry is not just library designed for JVM. It's whole standard including,
+  but not limited to, multiple language instrumentation, standard protocol for metrics, spans, tracing, logging data and
+  variety of exporters for free and commercial backends. 
+- Easy to plug automatic telemetry.
+  This is a huge benefit. With just couple environment variables and java agent you can start sending telemetry data
+  to almost any monitoring you need,
 
 Cons:
 - Not that much natively supported Scala libraries;
@@ -279,5 +291,4 @@ Cons:
 - [Getting Started With OpenTelemetry](https://dzone.com/refcardz/getting-started-with-opentelemetry)
 - [OpenTelemetry JVM instrumentation](https://opentelemetry.io/docs/instrumentation/java/)
 - [OpenTelemetry supported JVM libraries](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md)
-- [Splunk APM agent docker installation](https://docs.splunk.com/Observability/gdi/opentelemetry/install-linux.html#linux-docker)
-- [Instrument Java applications for Splunk Observability Cloud](https://docs.splunk.com/Observability/gdi/get-data-in/application/java/get-started.html#nav-Instrument-a-Java-application)
+- [OpenTelemetry and OpenTracing for Datadog](https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent)
