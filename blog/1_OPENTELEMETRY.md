@@ -57,6 +57,8 @@ Task ticketing system which we are going to monitor looks following at a high le
 - `notification-service` - micro-service for user subscriptions, send emails for subscribed tickets. Just show Kafka intention, is not present in implementation.
 - `projects-service` - micro-service for projects, which tickets are leave in. Stubbed with static data.
 
+Please, note: implementation of exact service depends on the stack we consider, but the overall architecture remains the same for the entire series.
+
 ### `tickets-service` API
 Example ticket model is following:
 ```json
@@ -88,10 +90,8 @@ Example ticket model is following:
 - Index ticket  document into `tickets` Elasticsearch index;
 - Send message to Kafka `tickets` topic identifying ticket updated event;
 
-- <br>`DELETE /v1/tickets/:id` - delete single ticket: 
+<br>`DELETE /v1/tickets/:id` - delete single ticket: 
 - Delete ticket by id from both Postgre and Elasticsearch;
-
-Please, note: implementation of exact service depends on the stack we consider, but the overall architecture remains the same for the entire series.
 
 ### Things to monitor
 Moving to data we would like to get the from our telemetry:
@@ -141,8 +141,8 @@ Talking about APM solutions, there are many services natively supporting OpenTel
 
 ### Automatic instrumentation
 OpenTelemetry provides easy way [to plug automatic instrumentation](https://opentelemetry.io/docs/instrumentation/java/automatic/)
-Taking into account `sbt` specifics, it is possible to do with following way:
-Add OpenTelemetry dependencies to the project:
+Taking into account `sbt` specifics, it is possible to do with following way.
+<br>First, add OpenTelemetry dependencies to the project:
 ```scala
 lazy val openTelemetrySpecific = {
   val version = "1.11.0"
@@ -168,7 +168,7 @@ Use [sbt-javaagent](https://github.com/sbt/sbt-javaagent) plugin to run app with
 addSbtPlugin("com.lightbend.sbt" % "sbt-javaagent" % "0.1.6")
 ```
 
-And add following line for project settings:
+And add following code for project settings:
 ```scala
 libraryDependencies += openTelemetrySpecific
 javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.11.0"
@@ -200,12 +200,12 @@ lazy val ticketsCounter: LongCounter = ticketsMeter
   .build()
 ```
 
-Great, now we can utilize `ticketsCounter` to track the number of tickets by inserting following line:
+Great, now we can utilize `ticketsCounter` to track the number of tickets, for instance by increasing:
 ```scala
 ticketsCounter.add(1)
 ```
 Now we have plugged instrumentation and custom metrics for `ticket-service`.
-Full service implementation you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/tree/main/opentelemetry)
+Full service implementation you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/tree/main/opentelemetry/src/main/scala/tickets)
 
 ### Metrics example: Prometheus
 Since OpenTelemetry supports integration with Prometheus for metrics exporting, we can use it to monitor `tickets_count`.
@@ -365,7 +365,7 @@ Highly likely it supports any of protocols supported by OpenTelemetry (such as J
 In conclusion, I would like to share the list of pros and cons of using OpenTelemetry for Scala and Lightbend stack projects.
 
 Pros:
-- _Open, vendor-agnostic standard with wide support among free and commercial monitoring solutions_;
+- _Open, vendor-agnostic standard with wide support among free and commercial monitoring solutions_.
   It is worth highlighting, that OpenTelemetry is not just a library designed for JVM. Its whole standard includes,
   but not limited to, multiple language instrumentation, a standard protocol for metrics, spans, tracing, logging data and
   variety of exporters for free and commercial backends.
