@@ -58,11 +58,6 @@ Task ticketing system which we are going to monitor looks following at a high le
 - `projects-service` - micro-service for projects, which tickets are leave in. Stubbed with static data.
 
 ### `tickets-service` API
-<br>`GET /v1/tickets?search={search-query}&project={}` - performs full text search over all tickets
-<br>`POST /v1/tickets` - create single ticket. TODO: how it works - store in postgre, es, send kafka message
-<br>`PUT /v1/tickets` - update single ticket.  TODO: how it works - update postgre, es, send update kafka message
-<br>`DELETE /v1/tickets/:id` - delete single ticket. TODO: how it works - remove from 
-
 Example ticket model is following:
 ```json
 {
@@ -77,6 +72,25 @@ Example ticket model is following:
 }
 ```
 
+`tickets-service` exposes following API endpoints.
+<br>`POST /v1/tickets` - create single ticket:
+- Request project by `project` id field from `projects-service` to verify project exists; 
+- Insert a record into Postgre `tickets` table;
+- Index ticket  document into `tickets` Elasticsearch index;
+- Send message to Kafka `tickets` topic identifying ticket created event;
+
+<br>`GET /v1/tickets?search={search-query}&project={}` - performs full text search over all tickets:
+- Search tickets by `title` and `description` in Elasticsearch;
+- Fetches full ticket records from Postgre `tickets` table by found `id`'s from Elasticsearch;
+
+<br>`PUT /v1/tickets` - update single ticket: 
+- Update a record in Postgre `tickets` table.
+- Index ticket  document into `tickets` Elasticsearch index;
+- Send message to Kafka `tickets` topic identifying ticket updated event;
+
+- <br>`DELETE /v1/tickets/:id` - delete single ticket: 
+- Delete ticket by id from both Postgre and Elasticsearch;
+
 Please, note: implementation of exact service depends on the stack we consider, but the overall architecture remains the same for the entire series.
 
 ### Things to monitor
@@ -90,10 +104,10 @@ To get some data for any telemetry from `ticket-service` we need to send some re
 I decided to use [Gatling](https://gatling.io) for this. 
 Although this is a rather load and performance testing tool, let's omit the testing aspect and use it just to simulate user traffic.
 The following scenario for a single user is used to put some load on service:
-- Create 20 tickets for 10 different projects;
-- Search tickets for 10 different projects;
-- Update 20 tickets;
-- Delete 30 tickets;
+- Create 20 tickets for 10 different projects via `POST /v1/tickets` endpoint;
+- Search tickets for 10 different projects via `GET /v1/tickets?search={search-query}&project={}` endpoint;
+- Update 20 tickets via `PUT /v1/tickets` endpoint;
+- Delete 30 tickets via `DELETE /v1/tickets/:id` endpoint;
 
 And this scenario used for simulating activity of 100 concurrent users. 
 
@@ -158,7 +172,7 @@ And add following line for project settings:
 ```scala
 libraryDependencies += openTelemetrySpecific
 javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.11.0"
-javaOptions += "-Dotel.javaagent.debug=true" //Debug OpenTelemetry Java agnet 
+javaOptions += "-Dotel.javaagent.debug=true" //Debug OpenTelemetry Java agent 
 ```
 
 Agent configuration can be supplied though environment variables or with Java options (e.g. `-D` argument).
@@ -371,7 +385,7 @@ your infrastructure you need to monitor and not only ecosystems or programing la
 
 In next part of "Telemetry with Scala", we will dive into Kamon framework and it's usage in conjunction with Lightbend stack.
 
-Thank you!.
+Thank you!
 
 ## Links
 - [Getting Started With OpenTelemetry](https://dzone.com/refcardz/getting-started-with-opentelemetry)
