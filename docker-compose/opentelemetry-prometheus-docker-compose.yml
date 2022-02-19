@@ -104,6 +104,7 @@ services:
     hostname: tickets_service
     restart: always
     environment:
+      - OTEL_SERVICE_NAME=tickets_service
       - OTEL_METRICS_EXPORTER=prometheus
       - OTEL_EXPORTER_PROMETHEUS_PORT=9094
       - OTEL_EXPORTER_PROMETHEUS_HOST=0.0.0.0

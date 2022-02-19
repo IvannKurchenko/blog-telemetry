@@ -48,8 +48,8 @@ task ticketing system, similar to well known Jira or Asana. Domain model is pret
 representing single task and `Project` which contains multiple tickets.
 This system at high level, consist of microservices responsible for projects management (`projects-service`),
 tickets management (`tickets-service`) and tickets change notifications, e.g. emails (`notification-service`).
-Since there are plenty of stuff to monitor, let's keep our focus on `tickets-service` - the abstract service we are going
-to monitor
+Since there are plenty of stuff to monitor, let's keep our focus on `tickets-service` only. 
+The `projects-service` is stubbed in our case, co 
 
 For the sake example, task tickets system is much simplified comparing to real world production system and
 does not include auth, caching, some services are stubbed at all.
@@ -66,9 +66,9 @@ Task ticketing system which we are going to monitor looks following at high leve
 
 ### `tickets-service` API
 <br>`GET /v1/tickets?search={search-query}&project={}` - performs full text search over all tickets
-<br>`POST /v1/tickets` - create single ticket
-<br>`PUT /v1/tickets` - update single ticket
-<br>`DELETE /v1/tickets/:id` - delete single ticket
+<br>`POST /v1/tickets` - create single ticket. TODO: how it works - store in postgre, es, send kafka message
+<br>`PUT /v1/tickets` - update single ticket.  TODO: how it works - update postgre, es, send update kafka message
+<br>`DELETE /v1/tickets/:id` - delete single ticket. TODO: how it works - remove from 
 
 Example ticket model is following:
 ```json
@@ -89,7 +89,8 @@ for entire series.
 
 ### Things to monitor
 For sake of example let's suppose we would like get following data from our telemetry:
-- HTTP requests spans - timings and details about each request handling;  
+- HTTP requests spans - timings and details about each request handling. Ideally, to get traces about how much time
+  application spend in 
 - Number of tickets metric - custom metric showing number of existing tickets. 
 
 ### Simulating user traffic
@@ -214,6 +215,7 @@ prometheus:
 Set necessary environment variables for `ticket-service` for prometheus exporter (see, [link](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#prometheus-exporter) for more details)  
 
 ```shell
+OTEL_SERVICE_NAME=tickets_service
 OTEL_METRICS_EXPORTER=prometheus
 OTEL_EXPORTER_PROMETHEUS_PORT=9094
 OTEL_EXPORTER_PROMETHEUS_HOST=0.0.0.0
@@ -245,8 +247,9 @@ zipkin:
 Set necessary environment variables for `ticket-service` for zipkin exporter (see, [link](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#zipkin-exporter) for more details)
 
 ```shell
+OTEL_SERVICE_NAME=tickets_service
 OTEL_TRACES_EXPORTER=zipkin
-OTEL_EXPORTER_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+OTEL_EXPORTER_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans # Replace `zipkin:9411` with your host and port.
 ```
 
 Let's start whole setup and run Gatling tests after. On Zipkin UI at `localhost:9411` we can find some `tickets_service` traces:
@@ -258,19 +261,109 @@ Which we expand, but unfortunately not many details could be found:
 Full docker-compose you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/blob/main/docker-compose/opentelemetry-zipkin-docker-compose.yml).
 
 ### APM Example: Datadog 
-Create collector for Datadog with API key
-https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent
+Within complex APM solutions, like Datadog, it is possible to combine and monitor metrics at single place, so 
+we can have both metrics and spans at single product.
+OpenTelemetry offers its own protocol called OTLP, which main advantage is it supports simultaneously export for metrics,
+spans and logs (not covered here). OTLP is push based protocol, meaning application must send 
 
+In case of Datadog APM, our application won't send data directly to the Datadog site. Instead, what we want is to set up
+and configure collector. See, following [documentation](https://opentelemetry.io/docs/collector/) for more details.
+Let's start from collector configuration:
+```yaml
+# Enables OTPL receiver
+receivers:
+  otlp:
+    # Enable OTPL receiver thought both gRPC and HTTP protocol.
+    protocols:
+      grpc:
+      http:
 
-Use OTLP exporter
-https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#otlp-exporter-span-metric-and-log-exporters
+processors:
+  batch:
+    timeout: 10s
 
+# Configure export of metrics and traces to Datadog
+exporters:
+  datadog/api:
+    # Enrich incoming data with additional metadata. 
+    env: local
+    service: tickets-service
+    version: latest
 
+    # Replace `DATADOG-API-KEY` and `DATADOG-API-SITE` (e.g. datadoghq.eu) with your own values
+    api:
+      key: {DATADOG-API-KEY}
+      site: {DATADOG-API-SITE}
 
+service:
+  pipelines:
+    # Enable receiving traces or spans data from application though OTPL protocol and export it to Datadog
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [datadog/api]
+    
+    # Enable receiving metrics data from application though OTPL protocol and export it to Datadog
+    metrics:
+      receivers: [ otlp ]
+      processors: [ batch]
+      exporters: [ datadog/api ]
+```
+Great, now we can use this configuration to either extending collector base Docker container 
+or plug it though shared volume. For sake of simplicity, let's go with building own container:
+```Docker
+FROM otel/opentelemetry-collector-contrib:0.45.0
+ADD otel-collector-config.yaml /etc/otel-collector-config.yaml
+```
+Please, NOTE: there are two similar base Docker images for OpenTelemetry collectors:
+- [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) - OpenTelemetry Collector core distribution.
+- [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib) - OpenTelemetry Collector customisations, which are not a part of core distribution. And we need exactly this one.
+
+After, our customized collector can be used, for example in docker compose:
+```yaml
+  opentelemetry-collector-contrib:
+    build: docker-opentelemetry-collector-contrib # Folder with Dockerfile and configuration
+    container_name: opentelemetry-collector-contrib
+    hostname: opentelemetry-collector-contrib
+    restart: always
+    command: ["--config=/etc/otel-collector-config.yaml"] # Specify path to configration
+    networks:
+      - tickets
+    ports:
+      - "4317:4317"
+```
+
+Collector is part ready. Now we need configure application instrumentation.
+For this, specify necessary environment variables for `ticket-service` for OTLP exporter (see, [link](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#otlp-exporter-span-metric-and-log-exporters) for more details)
+```yaml
+OTEL_SERVICE_NAME=tickets_service
+OTEL_TRACES_EXPORTER=otlp
+OTEL_METRICS_EXPORTER=otlp
+OTEL_EXPORTER_OTLP_ENDPOINT=http://opentelemetry-collector-contrib:4317
+```
+Pay attention to one detail: we need to specify both `OTEL_TRACES_EXPORTER` and `OTEL_METRICS_EXPORTER` to point to `otlp` exporter.
+
+Let's start whole setup and run Gatling tests after. First, we can check `tickets_count` in "Metrics" section of Datadog:
+![](images/screenshot_opentelemetry_datadog_metrics.png)
+
+Awesome, that works. Now moving on to traces: open "APM" -> "Traces". You can find plenty of tracked spans.
+![](images/screenshot_opentelemetry_datadog_traces_1.png)
+
+We can have a closer look, for instance, at some `POST /tickets` endpoint invocation which is responsible for ticket creation.
+Choose any trace for this endpoint and open "Span List":
+![](images/screenshot_opentelemetry_datadog_traces_2.png)
+
+And in this list you observe all requests from `ticket_service` to other services it does while creates new ticket
+
+Full docker-compose you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/blob/main/docker-compose/opentelemetry-datadog-docker-compose.yml).
+
+Off course this is just an example of APM usage, check [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib) and documentation of an APM you are interested about.
+Highly likely it supports any of protocols supported by OpenTelemetry (such as Jaeger) or has dedicated OpenTelemetry collector exporter.
 
 ## Conclusion
-Choose APM or Telemetry tool based on your infra, it should not be limited only to single eco-system.
-Next - Kamon + Lightbend
+Choose APM or build Telemetry solution based on your infra, it should not be limited only to single eco-system
+and plenty of details, such integration, should be taken into account.
+
 
 Pros:
 - Open, vendor-agnostic standard with wide support among free and commercial monitoring solutions;
@@ -287,8 +380,12 @@ Cons:
 - Does not instrument akka application properly: can not connect spans. I assume because of it relies on 
 - Subjective: Runtime magic and not intuitive.
 
+Next part - Kamon + Lightbend
+Thanks.
+
 ## Links
 - [Getting Started With OpenTelemetry](https://dzone.com/refcardz/getting-started-with-opentelemetry)
 - [OpenTelemetry JVM instrumentation](https://opentelemetry.io/docs/instrumentation/java/)
 - [OpenTelemetry supported JVM libraries](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md)
 - [OpenTelemetry and OpenTracing for Datadog](https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent)
+- [OTLP ingest in Datadog Agent](https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent)

@@ -1,5 +1,7 @@
+# Enables OTPL receiver
 receivers:
   otlp:
+    # Enable OTPL receiver thought both gRPC and HTTP protocol.
     protocols:
       grpc:
       http:
@@ -8,22 +10,28 @@ processors:
   batch:
     timeout: 10s
 
+# Configure export of metrics and traces to Datadog
 exporters:
   datadog/api:
+    # Enrich incoming data with additional metadata.
     env: local
     service: tickets-service
     version: latest
 
+    # Replace `DATADOG-API-KEY` and `DATADOG-API-SITE` (e.g. datadoghq.eu) with your own values
     api:
       key: {DATADOG-API-KEY}
-      site: datadoghq.eu
+      site: {DATADOG-API-SITE}
 
 service:
   pipelines:
+    # Enable receiving traces or spans data from application though OTPL protocol and export it to Datadog
     traces:
       receivers: [otlp]
       processors: [batch]
       exporters: [datadog/api]
+
+    # Enable receiving metrics data from application though OTPL protocol and export it to Datadog
     metrics:
       receivers: [ otlp ]
       processors: [ batch]
