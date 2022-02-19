@@ -10,7 +10,7 @@ Scala ecosystems, including some examples of APM solutions.  I possibly won't co
 Please, NOTE: this series is not going to compare telemetry as whole products between each other,
 instead it focuses on how to use each telemetry framework in different Scala ecosystem and perhaps highlight some pitfalls from this perspective only.
 
-Since this is quite large topic to discuss, just a small portion of code samples are present here. Please, see
+Since this is quite a large topic to discuss, just a small portion of code samples are present here. Please, see
 [this repository](https://github.com/IvannKurchenko/blog-telemetry) for complete results. 
 
 As the title says, in this particular post, we will focus on OpenTelemetry framework.
@@ -39,11 +39,11 @@ Looking ahead, this and the next post are focused on Lightbend stack, and the th
 
 ## System under monitoring
 To compare how to plug and use certain telemetry solutions for end-service, let's consider a single example service: a task ticketing system, similar to well-known Jira or Asana.
-The domain model is pretty simple -  there is `Ticket` representing a single task and `Project` which contains multiple tickets.
+The domain model is pretty simple -  there is `Ticket` represents a single task and `Project` which contains multiple tickets.
 This system at a high level consists of microservices responsible for projects management (`projects-service`),
 tickets management (`tickets-service`) and tickets change notifications, e.g. emails (`notification-service`).
 Since there is plenty of stuff to monitor, let's keep our focus on `tickets-service` only. 
-The `projects-service` is stubbed in our case and provides api just to fetch project by its id.
+The `projects-service` is stubbed in our case and provides API just to fetch project by its id.
 The `notification-service` shown as theoretical service.
 
 For the sake of example, the task tickets system is much simplified compared to the real-world production system and does not include things like auth, caching, load balancing, etc.
@@ -53,14 +53,14 @@ Task ticketing system which we are going to monitor looks following at a high le
 
 ![](images/diagram_system_architecture.drawio.png)
 
-- `tickets-service` - micro-service for tasks tickets, also provides full-text search capabilities, publish a change to Kafka topic.
+- `tickets-service` - micro-service for tasks tickets, also provides full-text search capabilities, publishes a change to Kafka topic.
 - `notification-service` - micro-service for user subscriptions, send emails for subscribed tickets. Just show Kafka intention, is not present in implementation.
-- `projects-service` - micro-service for projects, which tickets are leave in. Stubbed with static data.
+- `projects-service` - micro-service for projects, which tickets are leave-in. Stubbed with static data.
 
 Please, note: implementation of exact service depends on the stack we consider, but the overall architecture remains the same for the entire series.
 
 ### `tickets-service` API
-Example ticket model is following:
+The example ticket model is following:
 ```json
 {
   "id": 1,
@@ -75,13 +75,13 @@ Example ticket model is following:
 ```
 
 `tickets-service` exposes following API endpoints.
-<br>`POST /v1/tickets` - create single ticket:
+<br>`POST /v1/tickets` - create a single ticket:
 - Request project by `project` id field from `projects-service` to verify project exists; 
 - Insert a record into Postgre `tickets` table;
 - Index ticket  document into `tickets` Elasticsearch index;
 - Send message to Kafka `tickets` topic identifying ticket created event;
 
-<br>`GET /v1/tickets?search={search-query}&project={}` - performs full text search over all tickets:
+<br>`GET /v1/tickets?search={search-query}&project={project-id}` - performs a full-text search over all tickets:
 - Search tickets by `title` and `description` in Elasticsearch;
 - Fetches full ticket records from Postgre `tickets` table by found `id`'s from Elasticsearch;
 
@@ -94,9 +94,8 @@ Example ticket model is following:
 - Delete ticket by id from both Postgre and Elasticsearch;
 
 ### Things to monitor
-Moving to data we would like to get the from our telemetry:
-- HTTP requests spans - timings and details about each request handling. Ideally, to get traces about how much time
-  application spend in.
+Moving to data we would like to get from our telemetry:
+- HTTP requests spans - timings and details about each request handling. Ideally, to get traces about how much time the application spends in.
 - Tickets count - custom metric showing number of existing tickets. 
 
 ### Simulating user traffic
@@ -129,19 +128,19 @@ As you may see, nothing Scala specific and so far it has no dedicated support fo
 In particular for `ticket-service` case, we are interested about following instrumentation:
 "Akka HTTP", "JDBC", "Elasticsearch Client", "Kafka Producer/Consumer API"
 
-_Despite the fact that the list of available instrumentation's is pretty long, I strongly encourage you to check if it fits your particular needs._
+_Despite the fact that the list of available instrumentations is pretty long, I strongly encourage you to check if it fits your particular needs._
 
 ### Export 
 OpenTelemetry is designed in a way that instrumentation is abstracted over a backend it exposes metrics to.
 Such an approach allows supporting a variety of exporters, both pull and push based. See [Data Collection](https://opentelemetry.io/docs/concepts/data-collection/) page for more details.
-We will consider following exporters in examples: Prometheus, Zipkin and OTPL.
+We will consider the following exporters in examples: Prometheus, Zipkin, and OTPL.
 
 Talking about APM solutions, there are many services natively supporting OpenTelemetry, such as 
 [Splunk](https://www.splunk.com/en_us/observability/apm-application-performance-monitoring.html), [Datalog](https://docs.datadoghq.com/tracing/setup_overview/open_standards/), etc.
 
 ### Automatic instrumentation
-OpenTelemetry provides easy way [to plug automatic instrumentation](https://opentelemetry.io/docs/instrumentation/java/automatic/)
-Taking into account `sbt` specifics, it is possible to do with following way.
+OpenTelemetry provides an easy way [to plug automatic instrumentation](https://opentelemetry.io/docs/instrumentation/java/automatic/)
+Taking into account `sbt` specifics, it is possible to implement in the following approach.
 <br>First, add OpenTelemetry dependencies to the project:
 ```scala
 lazy val openTelemetrySpecific = {
@@ -175,7 +174,7 @@ javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.11.0
 javaOptions += "-Dotel.javaagent.debug=true" //Debug OpenTelemetry Java agent 
 ```
 
-Agent configuration can be supplied though environment variables or with Java options (e.g. `-D` argument).
+Agent configuration can be supplied through environment variables or with Java options (e.g. `-D` argument).
 Automatic tracing covers "HTTP requests spans" monitoring requirement.
 
 ### Metrics
@@ -249,7 +248,7 @@ zipkin:
       - "9411:9411"
 ```
 
-Then set necessary environment variables for `ticket-service` for zipkin exporter (see, [link](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#zipkin-exporter) for more details)
+Then set necessary environment variables for `ticket-service` for Zipkin exporter (see, [link](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#zipkin-exporter) for more details)
 
 ```shell
 OTEL_SERVICE_NAME=tickets_service
@@ -257,7 +256,7 @@ OTEL_TRACES_EXPORTER=zipkin
 OTEL_EXPORTER_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans # Replace `zipkin:9411` with your host and port.
 ```
 
-Let's start whole setup and run Gatling tests after. On Zipkin UI at `localhost:9411` we can find some `tickets_service` traces:
+Let's start the whole setup and run Gatling tests after. On Zipkin UI at `localhost:9411` we can find some `tickets_service` traces:
 ![](images/screenshot_opentelemetry_zipkin_1.png)
 
 If we open some example request, for instance `DELETE /tickets/:id`, not many details could be found:
@@ -266,13 +265,9 @@ If we open some example request, for instance `DELETE /tickets/:id`, not many de
 Full docker-compose you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/blob/main/docker-compose/opentelemetry-zipkin-docker-compose.yml).
 
 ### APM Example: Datadog 
-Within complex APM solutions, like Datadog, it is possible to combine and monitor both metrics and spans at a single place.
-OpenTelemetry offers its own protocol called OTLP, which main advantage is it supports simultaneously export for metrics,
-spans and logs (not covered here). OTLP is push based protocol, meaning application must send data to a collector.
+Within complex APM solutions, like Datadog, it is possible to combine and monitor both metrics and spans in a single place. OpenTelemetry offers its own protocol called OTLP, which main advantage is it supports simultaneously export for metrics, spans, and logs (not covered here). OTLP is a push-based protocol, meaning the application must send data to a collector.
 
-In case of Datadog APM, our application won't send data directly to the Datadog site or API. Instead, what we need is to set up
-and configure the collector. See, following [documentation](https://opentelemetry.io/docs/collector/) for more details.
-Let's start from collector configuration:
+In the case of Datadog APM, our application won't send data directly to the Datadog site or API. Instead, what we need is to set up and configure the collector. See, the [documentation](https://opentelemetry.io/docs/collector/) documentation for more details. Let's start from collector configuration:
 ```yaml
 # Enables OTPL receiver
 receivers:
@@ -320,9 +315,9 @@ ADD otel-collector-config.yaml /etc/otel-collector-config.yaml
 ```
 Please, NOTE: there are two similar base Docker images for OpenTelemetry collectors:
 - [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) - OpenTelemetry Collector core distribution.
-- [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib) - OpenTelemetry Collector customisations, which are not a part of core distribution. And we need exactly this one.
+- [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib) - OpenTelemetry Collector customizations, which are not a part of the core distribution. And we need exactly this one.
 
-After, our customized collector can be used, for example in docker compose:
+After, our customized collector can be used, for example in docker-compose:
 ```yaml
   opentelemetry-collector-contrib:
     build: docker-opentelemetry-collector-contrib # Folder with Dockerfile and configuration
@@ -352,13 +347,13 @@ Let's start the whole setup and run Gatling tests after. First, we can check `ti
 Awesome, that works. Now moving on to traces: open "APM" -> "Traces". You can find plenty of tracked spans.
 ![](images/screenshot_opentelemetry_datadog_traces_1.png)
 
-We can have a closer look, for instance, at some `POST /tickets` endpoint invocation which is responsible for ticket creation.
+We can have a closer look, for instance, at some `POST /tickets` endpoint invocation that is responsible for ticket creation.
 Choose any trace for this endpoint and open "Span List":
 ![](images/screenshot_opentelemetry_datadog_traces_2.png)
 
-And in this list, you observe all requests from `ticket_service` to other services it does while creating new ticket.
+And in this list, you can observe all requests from `ticket_service` to other services it does while creating a new ticket.
 Full docker-compose you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/blob/main/docker-compose/opentelemetry-datadog-docker-compose.yml).
-Off course this is just an example of APM usage, check [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib) and documentation of an APM you are interested about.
+Off course this is just an example of APM usage, check [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib) and documentation of an APM you are interested in.
 Highly likely it supports any of protocols supported by OpenTelemetry (such as Jaeger) or has a dedicated OpenTelemetry collector exporter.
 
 ## Conclusions
@@ -367,8 +362,8 @@ In conclusion, I would like to share the list of pros and cons of using OpenTele
 Pros:
 - _Open, vendor-agnostic standard with wide support among free and commercial monitoring solutions_.
   It is worth highlighting, that OpenTelemetry is not just a library designed for JVM. Its whole standard includes,
-  but not limited to, multiple language instrumentation, a standard protocol for metrics, spans, tracing, logging data and
-  variety of exporters for free and commercial backends.
+  but not limited to, multiple language instrumentation, a standard protocol for metrics, spans, tracing, logging data, and
+  a variety of exporters for free and commercial backends.
 
 - _Effortless to plug automatic telemetry_.
   This is a huge benefit. With just several environment variables and java agent you can start sending telemetry data
@@ -376,7 +371,7 @@ Pros:
 
 Cons:
 - _Not that many natively supported Scala libraries_.
-  For instance, Slick framework. Yes, OpenTelemetry can instrument low-level JDBC API, but in complex cases it's better to have some more high-level data.  
+  For instance, Slick framework. Yes, OpenTelemetry can instrument low-level JDBC API, but in complex cases, it's better to have some more high-level data.  
 - _Some dependencies with version `1.11.0` are still in `alpha`_.
   E.g.:  [opentelemetry-sdk-extension-autoconfigure](https://mvnrepository.com/artifact/io.opentelemetry/opentelemetry-sdk-extension-autoconfigure/1.11.0-alpha)
 
