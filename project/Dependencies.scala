@@ -3,7 +3,7 @@ import sbt._
 object Dependencies {
 
   lazy val circe = {
-    val circeVersion = "0.14.1"
+    val circeVersion = "0.14.5"
 
     Seq(
       "io.circe" %% "circe-core" % circeVersion,
@@ -13,13 +13,13 @@ object Dependencies {
   }
 
   lazy val pureConfig = {
-    Seq("com.github.pureconfig" %% "pureconfig" % "0.17.1")
+    Seq("com.github.pureconfig" %% "pureconfig" % "0.17.2")
   }
 
   lazy val common = circe ++ pureConfig
 
   lazy val kamon = {
-    val version = "2.4.6"
+    val version = "2.6.0"
     Seq(
       "io.kamon" %% "kamon-core" % version,
       "io.kamon" %% "kamon-core" % version
@@ -27,31 +27,37 @@ object Dependencies {
   }
 
   lazy val lightbendSpecific = {
+    val kafkaVersion = "3.4.0"
+    val elastic4sVersion = "8.6.0"
+    val slickVersion = "3.4.1"
+    val akkaVersion = "2.8.0"
+
     Seq(
-      "com.typesafe.akka" %% "akka-http" % "10.2.7",
+      "com.typesafe.akka" %% "akka-http" % "10.5.0",
       "de.heikoseeberger" %% "akka-http-circe" % "1.39.2",
-      "com.typesafe.akka" %% "akka-stream" % "2.6.18",
-      "com.typesafe.akka" %% "akka-actor-typed" % "2.6.18",
+      "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+      "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
 
-      "com.typesafe.slick" %% "slick" % "3.3.3",
-      "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3",
-      "org.postgresql" % "postgresql" % "42.2.24",
-      "org.flywaydb" % "flyway-core" % "8.5.0",
+      "com.typesafe.slick" %% "slick" % slickVersion,
+      "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
 
-      "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % "7.17.0",
-      "com.sksamuel.elastic4s" %% "elastic4s-json-circe" % "7.17.0",
+      "org.postgresql" % "postgresql" % "42.6.0",
+      "org.flywaydb" % "flyway-core" % "9.16.1",
 
-      "org.apache.kafka" %% "kafka" % "3.1.0",
-      "org.apache.kafka" % "kafka-clients" % "3.1.0",
-      "io.confluent" % "kafka-json-serializer" % "7.0.0",
+      "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % elastic4sVersion,
+      "com.sksamuel.elastic4s" %% "elastic4s-json-circe" % elastic4sVersion,
 
-      "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4",
-      "ch.qos.logback" % "logback-classic" % "1.2.10"
+      "org.apache.kafka" %% "kafka" % kafkaVersion,
+      "org.apache.kafka" % "kafka-clients" % kafkaVersion,
+      "io.confluent" % "kafka-json-serializer" % "7.3.3",
+
+      "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
+      "ch.qos.logback" % "logback-classic" % "1.4.6"
     )
   }
 
   lazy val openTelemetrySpecific = {
-    val version = "1.11.0"
+    val version = "1.24.0"
     val alphaVersion =  s"$version-alpha"
     Seq(
       "io.opentelemetry" % "opentelemetry-bom" % version pomOnly(),
@@ -73,10 +79,11 @@ object Dependencies {
   lazy val lightbend = lightbendSpecific ++ common
 
   lazy val gatling = {
+    val gatlingVersion = "3.9.2"
     Seq(
-      "io.gatling" % "gatling-core" % "3.7.4",
-      "io.gatling" % "gatling-test-framework" % "3.7.4",
-      "io.gatling.highcharts" % "gatling-charts-highcharts" % "3.7.4"
+      "io.gatling" % "gatling-core" % gatlingVersion,
+      "io.gatling" % "gatling-test-framework" % gatlingVersion,
+      "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion
     )
   }
 
