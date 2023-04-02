@@ -86,6 +86,22 @@ Request tracing with Akka-http
 https://kamon.io/docs/latest/instrumentation/akka-http/#request-tracing
 see if there is `X-Request-ID` in response headers and if it presents in spans
 
+https://kamon.io/docs/latest/reporters/zipkin/
+
+```hocon
+kamon {
+    zipkin {
+      host = "localhost"
+      port = 9411
+      protocol = "http"
+    }
+}
+```
+
+In response header you can find
+trace-id - `1b05566f51be20ad`
+
+![screenshot_kamon_zipkin.png](images/screenshot_kamon_zipkin.png)
 
 ### APM Example: Datadog
 

@@ -73,6 +73,7 @@ object Dependencies {
       "io.kamon" %% "kamon-bundle" % kamonVersion, //includes all instrumentation's,
 
       "io.kamon" %% "kamon-prometheus" % kamonVersion,
+      "io.kamon" %% "kamon-zipkin" % kamonVersion,
       "io.kamon" %% "kamon-apm-reporter" % kamonVersion
     )
   }
