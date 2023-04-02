@@ -1,6 +1,6 @@
 # Docker compose to run tickets service, environment for it and prometheus agent
-# Run with following command: docker-compose -f docker-compose/opentelemetry-prometheus-docker-compose.yml up -d
-# Stop with following command: docker-compose -f docker-compose/opentelemetry-prometheus-docker-compose.yml down
+# Run with following command: docker-compose -f docker-compose/kamon-prometheus-docker-compose.yml up -d
+# Stop with following command: docker-compose -f docker-compose/kamon-prometheus-docker-compose.yml down
 # After start open http://localhost:9090 to verify Prometheus is up and running
 version: "3.9"
 
@@ -100,20 +100,18 @@ services:
       - "9090:9090"
 
   tickets_service:
-    image: tickets_service_otel
-    container_name: tickets_service_otel
+    image: tickets_service_kamon
+    container_name: tickets_service_kamon
     hostname: tickets_service
     restart: always
     environment:
-      - OTEL_SERVICE_NAME=tickets_service
-      - OTEL_METRICS_EXPORTER=prometheus
-      - OTEL_EXPORTER_PROMETHEUS_PORT=9094
-      - OTEL_EXPORTER_PROMETHEUS_HOST=0.0.0.0
       - APPLICATION_ELASTICSEARCH_URL=http://elasticsearch:9200
       - APPLICATION_POSTGRE_URL=jdbc:postgresql://postgres:5432/tickets?user=tickets_user&password=tickets_password
       - APPLICATION_POSTGRE_HOST=postgres
       - APPLICATION_KAFKA_URL=kafka-1:9092
       - APPLICATION_PROJECTS_URL=http://projects_service:10000
+      - APPLICATION_PROMETHEUS_PORT=9094
+      - APPLICATION_PROMETHEUS_HOST=0.0.0.0
     networks:
       - tickets
     ports:

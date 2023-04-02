@@ -4,12 +4,14 @@ import io.gatling.core.Predef._
 import io.gatling.core.body.StringBody
 import io.gatling.http.Predef._
 import io.gatling.core.scenario.Simulation
+
 import io.circe.generic.auto._
 import io.circe.syntax._
 
 import java.nio.charset.Charset
 import scala.concurrent.duration._
 import scala.language.postfixOps
+
 
 class TicketsSimulation extends Simulation {
 

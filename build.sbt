@@ -8,6 +8,7 @@ lazy val load_testing =
   (project in file("load_testing")).
     enablePlugins(GatlingPlugin).
     settings(
+      scalaVersion := "2.13.10",
       libraryDependencies := Dependencies.loadTesting
     )
 
@@ -17,7 +18,9 @@ lazy val projects_service =
     settings(
       resolvers += "confluent" at "https://packages.confluent.io/maven/",
       libraryDependencies := Dependencies.lightbend,
+
       dockerExposedPorts := Seq(10000),
+      dockerBaseImage := "openjdk:17",
       Docker / packageName  := "projects_service",
       Docker / version := "latest"
     )
@@ -35,7 +38,27 @@ lazy val opentelemetry =
       mainClass := Some("tickets.TicketsServiceApplication"),
 
       dockerExposedPorts := Seq(10000),
-      Docker / packageName  := "tickets_service_otel",
+      dockerBaseImage := "openjdk:17",
+      Docker / packageName := "tickets_service_otel",
+      Docker / version := "latest",
+      Docker / dockerChmodType := DockerChmodType.UserGroupWriteExecute
+    )
+
+
+lazy val kamon =
+  (project in file("kamon")).
+    enablePlugins(JavaAgent, JavaAppPackaging, DockerPlugin).
+    settings(
+      resolvers += "confluent" at "https://packages.confluent.io/maven/",
+      libraryDependencies := Dependencies.kamon,
+
+      javaAgents += "io.kamon" % "kanela-agent" % "1.0.17",
+
+      mainClass := Some("tickets.TicketsServiceApplication"),
+
+      dockerExposedPorts := Seq(10000),
+      dockerBaseImage := "openjdk:17",
+      Docker / packageName  := "tickets_service_kamon",
       Docker / version := "latest",
       Docker / dockerChmodType := DockerChmodType.UserGroupWriteExecute
     )

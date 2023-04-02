@@ -18,14 +18,6 @@ object Dependencies {
 
   lazy val common = circe ++ pureConfig
 
-  lazy val kamon = {
-    val version = "2.6.0"
-    Seq(
-      "io.kamon" %% "kamon-core" % version,
-      "io.kamon" %% "kamon-core" % version
-    )
-  }
-
   lazy val lightbendSpecific = {
     val kafkaVersion = "3.4.0"
     val elastic4sVersion = "8.6.0"
@@ -35,8 +27,8 @@ object Dependencies {
     Seq(
       "com.typesafe.akka" %% "akka-http" % "10.5.0",
       "de.heikoseeberger" %% "akka-http-circe" % "1.39.2",
-      "com.typesafe.akka" %% "akka-stream" % akkaVersion,
-      "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
+      "com.typesafe.akka" %% "akka-stream" % akkaVersion exclude("org.scala-lang.modules", "scala-java8-compat_2.12"),
+      "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion exclude("org.scala-lang.modules", "scala-java8-compat_2.12"),
 
       "com.typesafe.slick" %% "slick" % slickVersion,
       "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
@@ -74,7 +66,20 @@ object Dependencies {
     )
   }
 
+  lazy val kamonSpecific = {
+    lazy val kamonVersion = "2.6.0"
+    Seq(
+      "io.kamon" %% "kamon-core" % kamonVersion,
+      "io.kamon" %% "kamon-bundle" % kamonVersion, //includes all instrumentation's,
+
+      "io.kamon" %% "kamon-prometheus" % kamonVersion,
+      "io.kamon" %% "kamon-apm-reporter" % kamonVersion
+    )
+  }
+
   lazy val openTelemetry = openTelemetrySpecific ++ lightbendSpecific ++ common
+
+  lazy val kamon = kamonSpecific ++ lightbendSpecific ++ common
 
   lazy val lightbend = lightbendSpecific ++ common
 

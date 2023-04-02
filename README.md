@@ -27,6 +27,7 @@ Build necessary docker containers:
 ```
 sbt projects_service/docker:publishLocal
 sbt opentelemetry/docker:publishLocal
+sbt kamon/docker:publishLocal
 ```
 
 Run specific system setup using docker compose. For instance :
