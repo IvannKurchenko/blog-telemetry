@@ -74,10 +74,6 @@ kamon {
 
 ### Tracing
 
-
-
-### Tracing example: Zipkin
-
 CHECK CONTEXT STUFF!!!!
 https://kamon.io/docs/latest/core/context/#context
 
@@ -85,6 +81,10 @@ https://kamon.io/docs/latest/core/context/#context
 Request tracing with Akka-http
 https://kamon.io/docs/latest/instrumentation/akka-http/#request-tracing
 see if there is `X-Request-ID` in response headers and if it presents in spans
+
+
+### Tracing example: Zipkin
+
 
 https://kamon.io/docs/latest/reporters/zipkin/
 
@@ -103,9 +103,31 @@ trace-id - `1b05566f51be20ad`
 
 ![screenshot_kamon_zipkin.png](images/screenshot_kamon_zipkin.png)
 
-### APM Example: Datadog
-
 ### APM Example: Kamon APM
+Kamon APM is a hosted commercial solution, which has native integration with Kamon library.
+https://kamon.io/docs/latest/reporters/apm/
+
+In order to plug Kamon APM reporter you need to add following dependency:
+```scala
+ "io.kamon" %% "kamon-apm-reporter" % "latest version"
+```
+
+Configuration looks pretty simple, all you need to do is to provide your API key:
+```hocon
+kamon {
+  apm.api-key = "YOUR_API_KEY"
+}
+```
+That's it - you're ready to go. After running tickets service you can see your metrics in Kamon APM dashboard immediately:
+![screenshot_kamon_apm_1.png](images/screenshot_kamon_apm_1.png)
+
+Great thing about Kamon APM is that it has pre-configured dashboards for JVM, JDBC and Akka specific metrics. 
+![screenshot_kamon_apm_2.png](images/screenshot_kamon_apm_2.png)
+
+Additionally, to metrics tracing data is also available in handy way, such as finding trace by `trace-id` header value: 
+![screenshot_kamon_apm_3.png](images/screenshot_kamon_apm_3.png)
+
+You can find more about Kamon APM [here](https://kamon.io/docs/latest/apm)
 
 ### Conclusion: 
 
