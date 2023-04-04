@@ -220,5 +220,5 @@ Another pitfall of Kamon is the limited number of [supported reporters](https://
 If you are using multiple languages across your organization, or you have an existing complex monitoring solution, then it's probably better to stick with OpenTelemetry, as it's language and vendor agnostic.
 But, if Scala and Akka ecosystem is your primary choice, then Kamon might be a better fit for you.
 
-That's it for this time. In the next post, we will talk about [Trace4Cats](https://github.com/trace4cats/trace4cats/) in TypeLevel stack-based projects.
-
+That's it for this time. All the code is available on [Github](https://github.com/IvannKurchenko/blog-telemetry).
+In the next post, we will talk about [Trace4Cats](https://github.com/trace4cats/trace4cats/) in TypeLevel stack-based projects.
