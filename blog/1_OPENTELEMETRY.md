@@ -142,7 +142,7 @@ Talking about APM solutions, there are many services natively supporting OpenTel
 OpenTelemetry provides an easy way [to plug automatic instrumentation](https://opentelemetry.io/docs/instrumentation/java/automatic/)
 Taking into account `sbt` specifics, it is possible to implement in the following approach.
 <br>First, add OpenTelemetry dependencies to the project:
-```scala
+```sbt
 lazy val openTelemetrySpecific = {
   val version = "1.11.0"
   val alphaVersion =  s"$version-alpha"
