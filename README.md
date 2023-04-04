@@ -11,6 +11,7 @@ Main source code divided on following subprojects:
 / projects_service - stub projects service
 / load_testing - Gatling tests to simulate user traffic
 / opentelemetry - System implementation using mostly "Lightbend" stack: akka, slick and Opentelemetry for instrumentation.
+/ kamon - System implementation using mostly "Lightbend" stack: akka, slick and Kamon for instrumentation.
 ```
 
 ### Misc
