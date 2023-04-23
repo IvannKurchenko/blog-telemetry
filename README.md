@@ -29,11 +29,12 @@ Build necessary docker containers:
 sbt projects_service/docker:publishLocal
 sbt opentelemetry/docker:publishLocal
 sbt kamon/docker:publishLocal
+sbt trace4cats/docker:publishLocal
 ```
 
 Run specific system setup using docker compose. For instance :
 ```
-docker-compose -f docker-compose/opentelemetry-prometheus-docker-compose.yml up -d
+docker-compose -f docker-compose/opentelemetry/prometheus-docker-compose.yml up -d
 ```
 
 After, run load testing to simulate user traffic 
@@ -45,5 +46,5 @@ Check target APM or any monitoring tool and verify telemetry has been sent.
 
 Stop environment using docker compose:
 ```
-docker-compose -f docker-compose/opentelemetry-prometheus-docker-compose.yml down
+docker-compose -f docker-compose/opentelemetry/prometheus-docker-compose.yml down
 ```

@@ -1,7 +1,9 @@
-# See for more details: https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent
-# Run with following command: docker-compose -f docker-compose/opentelemetry-datadog-docker-compose.yml up -d
-# Stop with following command: docker-compose -f docker-compose/opentelemetry-datadog-docker-compose.yml down
-version: "3"
+# Docker compose to run tickets service, environment for it and prometheus agent
+# Run with following command: docker-compose -f docker-compose/prometheus-docker-compose.yml up -d
+# Stop with following command: docker-compose -f docker-compose/prometheus-docker-compose.yml down
+# After start open http://localhost:9090 to verify Prometheus is up and running
+version: "3.9"
+
 services:
   projects_service:
     image: projects_service
@@ -87,6 +89,16 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
+  prometheus:
+    build: ../docker-prometheus
+    container_name: prometheus
+    hostname: prometheus
+    restart: always
+    networks:
+      - tickets
+    ports:
+      - "9090:9090"
+
   tickets_service:
     image: tickets_service_kamon
     container_name: tickets_service_kamon
@@ -98,18 +110,13 @@ services:
       - APPLICATION_POSTGRE_HOST=postgres
       - APPLICATION_KAFKA_URL=kafka-1:9092
       - APPLICATION_PROJECTS_URL=http://projects_service:10000
-      - APPLICATION_APM_API_KEY=YOUR_API_KEY
+      - APPLICATION_PROMETHEUS_PORT=9094
+      - APPLICATION_PROMETHEUS_HOST=0.0.0.0
     networks:
       - tickets
     ports:
       - "10001:10001"
-    depends_on:
-      - projects_service
-      - postgres
-      - elasticsearch
-      - zookeeper
-      - kafka-1
-      - kafka-2
+      - "9094:9094"
 
 networks:
   tickets:

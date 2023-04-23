@@ -16,11 +16,33 @@ object Dependencies {
     Seq("com.github.pureconfig" %% "pureconfig" % "0.17.2")
   }
 
-  lazy val common = circe ++ pureConfig
+  lazy val elastic4s = {
+    val elastic4sVersion = "8.6.0"
+    Seq(
+      "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % elastic4sVersion,
+      "com.sksamuel.elastic4s" %% "elastic4s-json-circe" % elastic4sVersion
+    )
+  }
+
+  lazy val flyway = {
+    Seq(
+      "org.postgresql" % "postgresql" % "42.6.0",
+      "org.flywaydb" % "flyway-core" % "9.16.1",
+    )
+  }
+
+  lazy val kafka = {
+    val kafkaVersion = "3.4.0"
+
+    Seq(
+      "org.apache.kafka" % "kafka-clients" % kafkaVersion,
+      "io.confluent" % "kafka-json-serializer" % "7.3.3",
+    )
+  }
+
+  lazy val common = circe ++ elastic4s ++ flyway ++ kafka
 
   lazy val lightbendSpecific = {
-    val kafkaVersion = "3.4.0"
-    val elastic4sVersion = "8.6.0"
     val slickVersion = "3.4.1"
     val akkaVersion = "2.8.0"
 
@@ -33,15 +55,6 @@ object Dependencies {
       "com.typesafe.slick" %% "slick" % slickVersion,
       "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
 
-      "org.postgresql" % "postgresql" % "42.6.0",
-      "org.flywaydb" % "flyway-core" % "9.16.1",
-
-      "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % elastic4sVersion,
-      "com.sksamuel.elastic4s" %% "elastic4s-json-circe" % elastic4sVersion,
-
-      "org.apache.kafka" %% "kafka" % kafkaVersion,
-      "org.apache.kafka" % "kafka-clients" % kafkaVersion,
-      "io.confluent" % "kafka-json-serializer" % "7.3.3",
 
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
       "ch.qos.logback" % "logback-classic" % "1.4.6"
@@ -50,7 +63,7 @@ object Dependencies {
 
   lazy val openTelemetrySpecific = {
     val version = "1.24.0"
-    val alphaVersion =  s"$version-alpha"
+    val alphaVersion = s"$version-alpha"
     Seq(
       "io.opentelemetry" % "opentelemetry-bom" % version pomOnly(),
       "io.opentelemetry" % "opentelemetry-api" % version,
@@ -78,11 +91,52 @@ object Dependencies {
     )
   }
 
-  lazy val openTelemetry = openTelemetrySpecific ++ lightbendSpecific ++ common
+  lazy val catsEffectSpecific = {
+    val catsEffectVersion = "3.4.8"
+    val http4sVersion = "0.23.18"
+    val doobieVersion = "1.0.0-RC1"
+    val pureConfigVersion = "0.17.3"
+    val log4catsVersion = "2.5.0"
 
-  lazy val kamon = kamonSpecific ++ lightbendSpecific ++ common
+    Seq(
+      "org.typelevel" %% "cats-effect" % catsEffectVersion,
 
-  lazy val lightbend = lightbendSpecific ++ common
+      "org.http4s" %% "http4s-dsl" % http4sVersion,
+      "org.http4s" %% "http4s-core" % http4sVersion,
+      "org.http4s" %% "http4s-client" % http4sVersion,
+      "org.http4s" %% "http4s-server" % http4sVersion,
+      "org.http4s" %% "http4s-circe" % http4sVersion,
+      "org.http4s" %% "http4s-ember-client" % http4sVersion,
+      "org.http4s" %% "http4s-ember-server" % http4sVersion,
+
+      "org.tpolecat" %% "doobie-core" % doobieVersion,
+
+      "org.tpolecat" %% "doobie-hikari" % doobieVersion, // HikariCP transactor.
+      "org.tpolecat" %% "doobie-postgres" % doobieVersion, // Postgres driver 42.3.1 + type mappings.
+
+      "com.github.pureconfig" %% "pureconfig-cats-effect" % pureConfigVersion,
+
+      "org.typelevel" %% "log4cats-core" % log4catsVersion,
+      "org.typelevel" %% "log4cats-slf4j" % log4catsVersion,
+      "ch.qos.logback" % "logback-classic" % "1.4.6"
+    )
+  }
+
+  lazy val trace4catsSpecific = {
+    val trace4catsVersion = "0.14.0"
+    Seq(
+      "io.janstenpickle" %% "trace4cats-core" % trace4catsVersion,
+      "io.janstenpickle" %% "trace4cats-avro-exporter" % trace4catsVersion
+    )
+  }
+
+  lazy val openTelemetry = openTelemetrySpecific ++ lightbendSpecific ++ pureConfig ++ common
+
+  lazy val kamon = kamonSpecific ++ lightbendSpecific ++ pureConfig ++ common
+
+  lazy val lightbend = lightbendSpecific ++ pureConfig ++ common
+
+  lazy val trace4cats = catsEffectSpecific ++ trace4catsSpecific ++ common
 
   lazy val gatling = {
     val gatlingVersion = "3.9.2"

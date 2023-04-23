@@ -1,5 +1,5 @@
 # Telemetry with Scala, part 2: Kamon
-![](images/diagram_kamon.drawio.png)
+![](images/kamon/diagram_kamon.drawio.png)
 
 ## Introduction
 Welcome to the second part of our telemetry with Scala series! In the previous [post](https://medium.com/@ivan-kurchenko/telemetry-with-scala-part-1-opentelemetry-758c72a136e7), we introduced OpenTelemetry, a vendor-neutral open-source framework for generating, collecting, and exporting telemetry data. We explored how OpenTelemetry can help us gain visibility into the behavior of distributed systems by capturing traces, metrics, and logs.
@@ -10,7 +10,7 @@ So let's explore Kamon and learn how it can help us monitor and improve the perf
 Before proceeding, first, let's have a quick recap of the system under monitoring from the previous post.
 This is a simple task ticketing (like Jira) service written on top of Akka HTTP and Slick and provides a very basic CRUD REST API for ticket management.
 
-![](images/diagram_system_architecture.drawio.png)
+![](images/opentelemetry/diagram_system_architecture.drawio.png)
 
 It uses the following external services:
 - PostgreSQL database to store tickets;
@@ -108,7 +108,7 @@ prometheus:
 ```
 Don't forget to expose `9094` port (or specific for your needs) for `tickets-service` for Prometheus agent to scrap metrics.
 Let's start the whole setup and run Gatling tests after. On Prometheus UI at `localhost:9090` we can find `tickets_count` metric:
-![screenshot_kamon_prometheus.png](images/screenshot_kamon_prometheus.png)
+![screenshot_kamon_prometheus.png](images/kamon/screenshot_kamon_prometheus.png)
 
 As you can see, we have `project_id` tag for `tickets_count` metric, which is added by our application.
 
@@ -172,7 +172,7 @@ zipkin:
 Let's start the whole setup and create ticket with `POST /tickets` request.
 Among response headers, you can find the value `trace-id` - `1b05566f51be20ad` which is a trace id of our request.
 On Zipkin UI at `localhost:9411` we can find our trace:
-![screenshot_kamon_zipkin.png](images/screenshot_kamon_zipkin.png)
+![screenshot_kamon_zipkin.png](images/kamon/screenshot_kamon_zipkin.png)
 
 This trace includes all requests made by our application, including requests to `projects-service`, queries to Postgres etc.
 
@@ -194,13 +194,13 @@ kamon {
 ```
 
 That's it - you're ready to go. Let's start `tickets_service` and Gatling tests after. You can find application metrics in Kamon APM dashboard immediately:
-![screenshot_kamon_apm_1.png](images/screenshot_kamon_apm_1.png)
+![screenshot_kamon_apm_1.png](images/kamon/screenshot_kamon_apm_1.png)
 
 The great thing about Kamon APM is that it has pre-configured dashboards for JVM, JDBC, and Akka-specific metrics.
-![screenshot_kamon_apm_2.png](images/screenshot_kamon_apm_2.png)
+![screenshot_kamon_apm_2.png](images/kamon/screenshot_kamon_apm_2.png)
 
 Additionally, tracing data is also available in a handy, such as finding trace by `trace-id` header value: 
-![screenshot_kamon_apm_3.png](images/screenshot_kamon_apm_3.png)
+![screenshot_kamon_apm_3.png](images/kamon/screenshot_kamon_apm_3.png)
 
 You can find more about Kamon APM [here](https://kamon.io/docs/latest/apm)
 

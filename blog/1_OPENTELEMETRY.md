@@ -1,5 +1,5 @@
 # Telemetry with Scala, part 1: OpenTelemetry
-![](images/diagram_opentelemetry.drawio.png)
+![](images/opentelemetry/diagram_opentelemetry.drawio.png)
 
 ## Introduction
 
@@ -28,7 +28,7 @@ Definitions could differ from source to source, so I try to give some average no
 Overall, when we're talking about any telemetry solution, we usually mean building a complex solution consisting of certain instrumentation, agent/storage, and visualization/APM solution.
 Schematically it showed in picture below:
 
-![](images/diagram_telemetry_layers.drawio.png)
+![](images/opentelemetry/diagram_telemetry_layers.drawio.png)
 
 ### Ecosystems
 Following ecosystems are going to be considered in series:
@@ -51,7 +51,7 @@ Along with that, the technical stack has been chosen to be more or less diverse 
 
 Task ticketing system which we are going to monitor looks following at a high level:
 
-![](images/diagram_system_architecture.drawio.png)
+![](images/opentelemetry/diagram_system_architecture.drawio.png)
 
 - `tickets-service` - micro-service for tasks tickets, also provides full-text search capabilities, publishes a change to Kafka topic.
 - `notification-service` - micro-service for user subscriptions, send emails for subscribed tickets. Just show Kafka intention, is not present in implementation.
@@ -230,7 +230,7 @@ OTEL_EXPORTER_PROMETHEUS_HOST=0.0.0.0
 Don't forget to expose `9094` port for `tickets-service` for Prometheus agent to scrap metrics.
 
 Let's start the whole setup and run Gatling tests after. On Prometheus UI at `localhost:9090` we can find `tickets_count` metric:
-![](images/screenshot_opentelemetry_prometheus.png)
+![](images/opentelemetry/screenshot_opentelemetry_prometheus.png)
 
 Full docker-compose you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/blob/main/docker-compose/opentelemetry-prometheus-docker-compose.yml).
 
@@ -257,10 +257,10 @@ OTEL_EXPORTER_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans # Replace `zipkin:
 ```
 
 Let's start the whole setup and run Gatling tests after. On Zipkin UI at `localhost:9411` we can find some `tickets_service` traces:
-![](images/screenshot_opentelemetry_zipkin_1.png)
+![](images/opentelemetry/screenshot_opentelemetry_zipkin_1.png)
 
 If we open some example request, for instance `DELETE /tickets/:id`, not many details could be found:
-![](images/screenshot_opentelemetry_zipkin_2.png)
+![](images/opentelemetry/screenshot_opentelemetry_zipkin_2.png)
 
 Full docker-compose you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/blob/main/docker-compose/opentelemetry-zipkin-docker-compose.yml).
 
@@ -342,14 +342,14 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://opentelemetry-collector-contrib:4317
 Pay attention to one detail: we need to specify both `OTEL_TRACES_EXPORTER` and `OTEL_METRICS_EXPORTER` to point to `otlp` exporter.
 
 Let's start the whole setup and run Gatling tests after. First, we can check `tickets_count` in "Metrics" section of Datadog:
-![](images/screenshot_opentelemetry_datadog_metrics.png)
+![](images/opentelemetry/screenshot_opentelemetry_datadog_metrics.png)
 
 Awesome, that works. Now moving on to traces: open "APM" -> "Traces". You can find plenty of tracked spans.
-![](images/screenshot_opentelemetry_datadog_traces_1.png)
+![](images/opentelemetry/screenshot_opentelemetry_datadog_traces_1.png)
 
 We can have a closer look, for instance, at some `POST /tickets` endpoint invocation that is responsible for ticket creation.
 Choose any trace for this endpoint and open "Span List":
-![](images/screenshot_opentelemetry_datadog_traces_2.png)
+![](images/opentelemetry/screenshot_opentelemetry_datadog_traces_2.png)
 
 And in this list, you can observe all requests from `ticket_service` to other services it does while creating a new ticket.
 Full docker-compose you can find by [this link](https://github.com/IvannKurchenko/blog-telemetry/blob/main/docker-compose/opentelemetry-datadog-docker-compose.yml).
