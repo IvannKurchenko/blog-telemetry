@@ -17,7 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class TicketsElasticRepository(configuration: ElasticsearchConfiguration)
                               (implicit ec: ExecutionContext) {
 
-  private val client = {
+  private val client: ElasticClient = {
     ElasticClient(JavaClient(ElasticProperties(configuration.url)))
   }
 

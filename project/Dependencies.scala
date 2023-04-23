@@ -97,6 +97,7 @@ object Dependencies {
     val doobieVersion = "1.0.0-RC1"
     val pureConfigVersion = "0.17.3"
     val log4catsVersion = "2.5.0"
+    val fs2Version = "3.0.0"
 
     Seq(
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
@@ -113,6 +114,8 @@ object Dependencies {
 
       "org.tpolecat" %% "doobie-hikari" % doobieVersion, // HikariCP transactor.
       "org.tpolecat" %% "doobie-postgres" % doobieVersion, // Postgres driver 42.3.1 + type mappings.
+
+      "com.github.fd4s" %% "fs2-kafka" % fs2Version,
 
       "com.github.pureconfig" %% "pureconfig-cats-effect" % pureConfigVersion,
 
