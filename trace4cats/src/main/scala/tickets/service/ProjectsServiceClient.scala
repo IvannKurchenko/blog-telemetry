@@ -3,15 +3,15 @@ package tickets.service
 import tickets.ProjectsServiceConfiguration
 import tickets.model.Project
 
-import cats.effect.*
-import org.http4s.implicits.*
-import org.http4s.*
-import org.http4s.client.*
-import org.http4s.circe.*
-import org.http4s.circe.CirceEntityCodec.*
-import org.http4s.dsl.io.*
+import cats.effect._
+import org.http4s.implicits._
+import org.http4s._
+import org.http4s.client._
+import org.http4s.circe._
+import org.http4s.circe.CirceEntityCodec._
+import org.http4s.dsl.io._
 import org.http4s.ember.client.EmberClientBuilder
-import io.circe.generic.auto.*
+import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

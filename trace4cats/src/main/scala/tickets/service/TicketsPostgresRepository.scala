@@ -1,12 +1,12 @@
 package tickets.service
 
+import cats.data.NonEmptyList
 import tickets.model.Ticket
-
 import doobie._
 import doobie.implicits._
 import cats.effect.IO
-import scala.concurrent.ExecutionContext
 
+import scala.concurrent.ExecutionContext
 import cats.effect.unsafe.implicits.global
 
 class TicketsPostgresRepository {
@@ -19,8 +19,8 @@ class TicketsPostgresRepository {
   )
 
 
-  def getByIds(ids: Set[Long]): IO[List[Ticket]] = {
-    sql"select * from tickets where id in (${ids.mkString(",")})"
+  def getByIds(ids: NonEmptyList[Long]): IO[List[Ticket]] = {
+    (fr"select * from tickets where" ++ Fragments.in(fr"id", ids))
       .query[Ticket]
       .stream
       .transact(xa)
@@ -29,7 +29,7 @@ class TicketsPostgresRepository {
   }
 
   def getById(id: Long): IO[Option[Ticket]] = {
-    sql"select * from tickets where id = id"
+    sql"select * from tickets where id = $id"
       .query[Ticket]
       .stream
       .transact(xa)

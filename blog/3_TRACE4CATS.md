@@ -67,6 +67,9 @@ https://http4s.github.io/http4s-prometheus-metrics/
 
 ### Metrics example: Prometheus
 
+### Tracing
+HOW TO PASS TRACING CONTEXT THOUGH IO AND APPLICATION (LOGS) TO ANOTHER SERVICE!
+
 ### Tracing example: Zipkin
 
 

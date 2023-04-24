@@ -1,16 +1,16 @@
 package tickets.service
 
-import cats.effect.*
-import cats.syntax.all.*
-import fs2.kafka.*
+import cats.effect._
+import cats.syntax.all._
+import fs2.kafka._
 import tickets.KafkaConfiguration
 import tickets.model.{Ticket, TicketEvent}
-import io.circe.*
+import io.circe._
 import io.circe.Decoder.Result
-import io.circe.syntax.*
-import io.circe.generic.auto.*
+import io.circe.syntax._
+import io.circe.generic.auto._
 
-import scala.concurrent.duration.*
+import scala.concurrent.duration._
 
 class TicketsKafkaProducer(kafka: KafkaConfiguration) {
   val a: Either[ParsingFailure, Result[TicketEvent]] = parser.parse("").map(_.as[TicketEvent])

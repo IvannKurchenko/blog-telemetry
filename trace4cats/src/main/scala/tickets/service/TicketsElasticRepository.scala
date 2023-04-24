@@ -2,15 +2,15 @@ package tickets.service
 
 import cats.effect.IO
 import com.fasterxml.jackson.module.scala.JavaTypeable
-import com.sksamuel.elastic4s.ElasticDsl.*
-import com.sksamuel.elastic4s.circe.*
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.circe._
 import com.sksamuel.elastic4s.fields.TextField
 import com.sksamuel.elastic4s.http.JavaClient
 import com.sksamuel.elastic4s.requests.common.RefreshPolicy
 import com.sksamuel.elastic4s.requests.indexes.CreateIndexResponse
 import com.sksamuel.elastic4s.requests.searches.queries.Query
-import com.sksamuel.elastic4s.*
-import io.circe.generic.auto.*
+import com.sksamuel.elastic4s._
+import io.circe.generic.auto._
 import tickets.ElasticsearchConfiguration
 import tickets.model.{SearchTicket, Ticket}
 
@@ -56,6 +56,6 @@ class TicketsElasticRepository(configuration: ElasticsearchConfiguration)(implic
                                         handler: Handler[T, U],
                                         javaTypeable: JavaTypeable[U],
                                         options: CommonRequestOptions): IO[Response[U]] = {
-    IO.fromFuture(IO.pure(client.execute(t)))
+    IO.fromFuture(IO.pure(client.execute[T, U, Future](t)))
   }
 }

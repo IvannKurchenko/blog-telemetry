@@ -74,7 +74,7 @@ lazy val trace4cats =
   (project in file("trace4cats")).
     enablePlugins(JavaAgent, JavaAppPackaging, DockerPlugin).
     settings(
-      scalaVersion := "3.2.2",
+      scalaVersion := "2.13.10",
 
       resolvers += "confluent" at "https://packages.confluent.io/maven/",
       libraryDependencies := Dependencies.trace4cats,

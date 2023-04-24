@@ -1,6 +1,9 @@
 package tickets.service
 
+import cats.data.NonEmptyList
 import cats.effect.IO
+import org.typelevel.log4cats.{Logger, SelfAwareStructuredLogger}
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import tickets.model.{CreateTicket, Ticket, UpdateTicket}
 
 class TicketsService(postgres: TicketsPostgresRepository,
@@ -8,6 +11,7 @@ class TicketsService(postgres: TicketsPostgresRepository,
                      kafka: TicketsKafkaProducer,
                      projects: ProjectsServiceClient,
                      /*ticketsCounter: LongCounter*/) {
+  implicit def logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
   def createTicket(create: CreateTicket): IO[Ticket] = {
     val ticket = Ticket(
@@ -21,15 +25,16 @@ class TicketsService(postgres: TicketsPostgresRepository,
       modifiedBy = create.creator,
     )
 
-    //logger.info(s"Creating ticket: $ticket")
+    
     for {
+      _ <- logger.info(s"Creating ticket: $ticket")
       _ <- verifyProject(ticket.project)
       ticket <- postgres.create(ticket)
       _ <- elastic.indexTicket(ticket)
       _ <- kafka.sendCreated(ticket)
       //_ <- Future(ticketsCounter.add(1))
+      _ <- logger.info(s"Created ticket: $ticket")
     } yield {
-      //logger.info(s"Created ticket: $ticket")
       ticket
     }
   }
@@ -37,13 +42,16 @@ class TicketsService(postgres: TicketsPostgresRepository,
   def searchTickets(query: Option[String], project: Option[Long]): IO[List[Ticket]] = {
     for {
       foundTickets <- elastic.searchTickets(query, project)
-      tickets <- postgres.getByIds(foundTickets.map(_.id).toSet)
+      _ <- logger.info(s"Found tickets: $foundTickets")
+      tickets <- NonEmptyList.fromList(foundTickets.toList).fold(IO.pure(List.empty[Ticket])) { tickets =>
+        postgres.getByIds(tickets.map(_.id))
+      }
     } yield tickets
   }
 
   def update(update: UpdateTicket): IO[Option[Ticket]] = {
-    //logger.info(s"Updating ticket: $update")
     for {
+      _ <- logger.info(s"Updating ticket: $update")
       _ <- verifyProject(update.project)
       existing <- postgres.getById(update.id)
       updated = existing.map(
@@ -62,10 +70,9 @@ class TicketsService(postgres: TicketsPostgresRepository,
           _ <- kafka.sendUpdated(ticket)
         } yield ()
       }
-    } yield {
-      //logger.info(s"Updated ticket: $updated")
+      _ <- logger.info(s"Updated ticket: $updated")
+    } yield
       updated
-    }
   }
 
   def delete(id: Long): IO[Boolean] = {

@@ -40,7 +40,7 @@ object Dependencies {
     )
   }
 
-  lazy val common = circe ++ elastic4s ++ flyway ++ kafka
+  lazy val common = circe ++ pureConfig ++ elastic4s ++ flyway ++ kafka
 
   lazy val lightbendSpecific = {
     val slickVersion = "3.4.1"
@@ -95,7 +95,6 @@ object Dependencies {
     val catsEffectVersion = "3.4.8"
     val http4sVersion = "0.23.18"
     val doobieVersion = "1.0.0-RC1"
-    val pureConfigVersion = "0.17.3"
     val log4catsVersion = "2.5.0"
     val fs2Version = "3.0.0"
 
@@ -117,8 +116,6 @@ object Dependencies {
 
       "com.github.fd4s" %% "fs2-kafka" % fs2Version,
 
-      "com.github.pureconfig" %% "pureconfig-cats-effect" % pureConfigVersion,
-
       "org.typelevel" %% "log4cats-core" % log4catsVersion,
       "org.typelevel" %% "log4cats-slf4j" % log4catsVersion,
       "ch.qos.logback" % "logback-classic" % "1.4.6"
@@ -133,11 +130,11 @@ object Dependencies {
     )
   }
 
-  lazy val openTelemetry = openTelemetrySpecific ++ lightbendSpecific ++ pureConfig ++ common
+  lazy val openTelemetry = openTelemetrySpecific ++ lightbendSpecific  ++ common
 
-  lazy val kamon = kamonSpecific ++ lightbendSpecific ++ pureConfig ++ common
+  lazy val kamon = kamonSpecific ++ lightbendSpecific  ++ common
 
-  lazy val lightbend = lightbendSpecific ++ pureConfig ++ common
+  lazy val lightbend = lightbendSpecific  ++ common
 
   lazy val trace4cats = catsEffectSpecific ++ trace4catsSpecific ++ common
 

@@ -1,0 +1,39 @@
+# Create a ticket
+POST http://localhost:10001/tickets
+
+{
+        "project": 4,
+        "title": "Test ticket title 1",
+        "description": "Test ticket description: ",
+        "creator": "john.doe@acme.com"
+}
+
+###
+
+
+# Update a ticket
+PUT http://localhost:10001/tickets
+
+{
+        "id": 3,
+        "project": 4,
+        "title": "Test ticket title 1",
+        "description": "Test ticket description: 1.",
+        "updater": "another_test_user"
+}
+
+###
+
+# Search for tickets
+GET http://localhost:10001/tickets?project=4&title=Test
+
+###
+
+# Search for tickets in ElasticSearch
+http://localhost:9200/tickets/_search?pretty=true
+
+
+###
+
+# Delete a ticket
+DELETE http://localhost:10001/tickets/2
