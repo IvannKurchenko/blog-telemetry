@@ -16,7 +16,7 @@ Trace4cats
 - Conclusion: couple words, pros, cons, compare with otel4s https://github.com/typelevel/otel4s
 
 
-# Telemetry with Scala, part 2: Kamon
+# Telemetry with Scala, part 3: trace4cats
 ![](images/trace4cats/diagram_trace4cats.png)
 
 ## Introduction
@@ -56,6 +56,8 @@ then search for them, update them and delete them.
 
 ## trace4cats
 ### Overview:
+what it can do and what instrumentation it provides.
+What it is based on? In this example we will focus on OTEL, but it provides support for other exporters as well.
 
 
 ### How to plug instrumentation to an application
@@ -77,3 +79,8 @@ HOW TO PASS TRACING CONTEXT THOUGH IO AND APPLICATION (LOGS) TO ANOTHER SERVICE!
 
 
 ### Conclusion 
+
+
+
+### References
+https://github.com/trace4cats/trace4cats#documentation - trace4cats documentation
