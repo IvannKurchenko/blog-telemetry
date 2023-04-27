@@ -1,19 +1,22 @@
 package tickets.service
 
 import cats.data.NonEmptyList
-import cats.effect.IO
-import org.typelevel.log4cats.{Logger, SelfAwareStructuredLogger}
+import cats.implicits._
+import cats.effect.{Async, Sync}
+import org.http4s.dsl.Http4sDslBinCompat
+import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import tickets.model.{CreateTicket, Ticket, UpdateTicket}
 
-class TicketsService(postgres: TicketsPostgresRepository,
-                     elastic: TicketsElasticRepository,
-                     kafka: TicketsKafkaProducer,
-                     projects: ProjectsServiceClient,
-                     /*ticketsCounter: LongCounter*/) {
-  implicit def logger: Logger[IO] = Slf4jLogger.getLogger[IO]
+class TicketsService[F[_]](postgres: TicketsPostgresRepository[F],
+                           elastic: TicketsElasticRepository[F],
+                           kafka: TicketsKafkaProducer[F],
+                           projects: ProjectsServiceClient[F],
+                           /*ticketsCounter: LongCounter*/)(implicit F: Sync[F], A: Async[F]) {
 
-  def createTicket(create: CreateTicket): IO[Ticket] = {
+  implicit def logger: Logger[F] = Slf4jLogger.getLogger[F]
+
+  def createTicket(create: CreateTicket): F[Ticket] = {
     val ticket = Ticket(
       id = -1,
       project = create.project,
@@ -25,7 +28,7 @@ class TicketsService(postgres: TicketsPostgresRepository,
       modifiedBy = create.creator,
     )
 
-    
+
     for {
       _ <- logger.info(s"Creating ticket: $ticket")
       _ <- verifyProject(ticket.project)
@@ -39,17 +42,17 @@ class TicketsService(postgres: TicketsPostgresRepository,
     }
   }
 
-  def searchTickets(query: Option[String], project: Option[Long]): IO[List[Ticket]] = {
+  def searchTickets(query: Option[String], project: Option[Long]): F[List[Ticket]] = {
     for {
       foundTickets <- elastic.searchTickets(query, project)
       _ <- logger.info(s"Found tickets: $foundTickets")
-      tickets <- NonEmptyList.fromList(foundTickets.toList).fold(IO.pure(List.empty[Ticket])) { tickets =>
+      tickets <- NonEmptyList.fromList(foundTickets).fold(F.pure(List.empty[Ticket])) { tickets =>
         postgres.getByIds(tickets.map(_.id))
       }
     } yield tickets
   }
 
-  def update(update: UpdateTicket): IO[Option[Ticket]] = {
+  def update(update: UpdateTicket): F[Option[Ticket]] = {
     for {
       _ <- logger.info(s"Updating ticket: $update")
       _ <- verifyProject(update.project)
@@ -63,7 +66,7 @@ class TicketsService(postgres: TicketsPostgresRepository,
           modifiedAt = System.currentTimeMillis()
         )
       )
-      _ <- updated.fold(IO.unit) { ticket =>
+      _ <- updated.fold(F.unit) { ticket =>
         for {
           _ <- postgres.update(ticket)
           _ <- elastic.indexTicket(ticket)
@@ -75,7 +78,7 @@ class TicketsService(postgres: TicketsPostgresRepository,
       updated
   }
 
-  def delete(id: Long): IO[Boolean] = {
+  def delete(id: Long): F[Boolean] = {
     for {
       count <- postgres.delete(id)
       _ <- elastic.deleteTicket(id)
@@ -83,10 +86,10 @@ class TicketsService(postgres: TicketsPostgresRepository,
     } yield count > 0
   }
 
-  private def verifyProject(project: Long): IO[Unit] = {
+  private def verifyProject(project: Long): F[Unit] = {
     for {
       project <- projects.findProject(project)
-      _ <- project.fold(IO.raiseError[Unit](new Exception(s"No project found: $project")))(_ => IO.unit)
+      _ <- project.fold(F.raiseError[Unit](new Exception(s"No project found: $project")))(_ => F.unit)
     } yield ()
   }
 }

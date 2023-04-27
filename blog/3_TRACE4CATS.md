@@ -56,11 +56,54 @@ then search for them, update them and delete them.
 
 ## trace4cats
 ### Overview:
+Tracing library with rich functionality and support for multiple exporters.
+Tracing and distributed tracing in particular is it's main focus. 
+Because of this it does not support metrics collection, so in order to build complete telemetry solution within an application, it should be combined with other libraries.
+Supports many exporters, including OpenTelemetry, Jaeger, Zipkin, DataDog, NewRelic, etc.
+There are plenty of tracing functionality.
+
+
+
 what it can do and what instrumentation it provides.
 What it is based on? In this example we will focus on OTEL, but it provides support for other exporters as well.
 
+Supports multiple collectors()
+
+
+According to the docs heave inspired on [Natches](https://typelevel.org/natchez/overview.html). 
+And Nutches seems like not finished project, which providers good skeleton but there is no provided instrumentations and exporters.
+
+On the other hand, there is https://github.com/typelevel/otel4s which is a bridge between OpenTelemetry and cats effect ecosystem.
+Tracing functionality overlaps with trace4cats, which can cause some confusion.
+
+Hence in scope of this blog post final setup for `tickets-service` telemetry will be the following:
+- `OpenTelemetry` as a main telemetry solution and backend for all telemetry data;
+- `trace4cats` as main tracing library for the application, because of instrumentation support and rich functionality;
+- `otel4s` as a main metrics library;
 
 ### How to plug instrumentation to an application
+
+There are many ways to convfigure trace4cats,
+(even though HTTP API  - https://github.com/trace4cats/trace4cats-docs/blob/master/docs/design.md)
+
+
+http4s:
+https://github.com/trace4cats/trace4cats-docs/blob/master/docs/examples.md#http4s
+https://github.com/trace4cats/trace4cats-docs/blob/master/modules/example/src/main/scala/trace4cats/example/Http4sExample.scala
+
+fs2:
+https://github.com/trace4cats/trace4cats-docs/blob/master/docs/examples.md#fs2
+https://github.com/trace4cats/trace4cats-docs/blob/master/modules/example/src/main/scala/trace4cats/example/Fs2Example.scala
+
+https://github.com/trace4cats/trace4cats-docs/blob/master/docs/examples.md#fs2-advanced
+https://github.com/trace4cats/trace4cats-docs/blob/master/modules/example/src/main/scala/trace4cats/example/Fs2AdvancedExample.scala
+
+
+ElasticSearch:
+elasticsearch - auto instrumentation via OTEL + custom span coverage
+doobie - auto instrumentation via OTEL (JDBC) + custom span coverage
+
+
 
 ### Metrics
 
@@ -71,6 +114,15 @@ https://http4s.github.io/http4s-prometheus-metrics/
 
 ### Tracing
 HOW TO PASS TRACING CONTEXT THOUGH IO AND APPLICATION (LOGS) TO ANOTHER SERVICE!
+https://typelevel.org/cats-effect/docs/core/io-local
+
+https://http4s.org/v0.21/api/org/http4s/server/middleware/RequestId$
+```scala
+equest.attributes.lookup(RequestId.requestIdAttrKey)
+```
+
+Custom spans - 
+
 
 ### Tracing example: Zipkin
 
@@ -84,3 +136,6 @@ HOW TO PASS TRACING CONTEXT THOUGH IO AND APPLICATION (LOGS) TO ANOTHER SERVICE!
 
 ### References
 https://github.com/trace4cats/trace4cats#documentation - trace4cats documentation
+https://typelevel.org/cats-effect/docs/core/io-local - passing tracing context through IO
+https://typelevel.org/otel4s/index.html - otel4s
+https://www.youtube.com/watch?v=wPZlTcdlGmo - Distributed Application Tracing with Trace4Cats by Chris Jansen

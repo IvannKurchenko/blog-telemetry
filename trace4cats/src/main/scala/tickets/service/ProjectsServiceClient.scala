@@ -1,35 +1,31 @@
 package tickets.service
 
+import cats.effect._
+import cats.implicits._
+import fs2.io.net.Network
+import io.circe.generic.auto._
+import org.http4s._
+import org.http4s.circe.CirceEntityCodec._
+import org.http4s.ember.client.EmberClientBuilder
 import tickets.ProjectsServiceConfiguration
 import tickets.model.Project
 
-import cats.effect._
-import org.http4s.implicits._
-import org.http4s._
-import org.http4s.client._
-import org.http4s.circe._
-import org.http4s.circe.CirceEntityCodec._
-import org.http4s.dsl.io._
-import org.http4s.ember.client.EmberClientBuilder
-import io.circe.generic.auto._
+class ProjectsServiceClient[F[_]](configuration: ProjectsServiceConfiguration)
+                                                       (implicit F: Sync[F], A: Async[F], N: Network[F]) {
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
-class ProjectsServiceClient(configuration: ProjectsServiceConfiguration) {
-
-  def findProject(id: Long): IO[Option[Project]] = {
+  def findProject(id: Long): F[Option[Project]] = {
     EmberClientBuilder
-      .default[IO]
+      .default[F]
       .build
       .use { client =>
-        val request = Request[IO](Method.GET, Uri.unsafeFromString(s"${configuration.url}/projects/$id"))
+        val request = Request[F](Method.GET, Uri.unsafeFromString(s"${configuration.url}/projects/$id"))
         client.run(request).use { response =>
           response.status match {
-            case Status.NotFound => IO.pure(None)
+            case Status.NotFound => F.pure(None)
             case Status.Ok => response.as[Project].map(Some(_))
             case status =>
               response.as[String].flatMap { body =>
-                IO.raiseError(new Exception(s"Failure response code received $status: $body"))
+                F.raiseError(new Exception(s"Failure response code received $status: $body"))
               }
           }
         }

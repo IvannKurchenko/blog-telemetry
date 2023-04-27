@@ -12,7 +12,7 @@ object TicketsServiceApplication extends IOApp {
   implicit def logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
   def run(args: List[String]): IO[ExitCode] = {
-    val module = new TicketsServiceModule()
+    val module = new TicketsServiceModule[IO]()
     import module._
 
     for {
