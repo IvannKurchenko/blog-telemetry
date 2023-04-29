@@ -123,18 +123,22 @@ object Dependencies {
   }
 
   lazy val trace4catsSpecific = {
-    val trace4catsVersion = "0.14.0"
+    val trace4catsVersion = "0.14.2"
+    val trace4catsHttps4sVersion = "0.14.0"
+
     Seq(
       "io.janstenpickle" %% "trace4cats-core" % trace4catsVersion,
-      "io.janstenpickle" %% "trace4cats-avro-exporter" % trace4catsVersion
+
+      "io.janstenpickle" %% "trace4cats-http4s-client" % trace4catsHttps4sVersion,
+      "io.janstenpickle" %% "trace4cats-http4s-server" % trace4catsHttps4sVersion
     )
   }
 
-  lazy val openTelemetry = openTelemetrySpecific ++ lightbendSpecific  ++ common
+  lazy val openTelemetry = openTelemetrySpecific ++ lightbendSpecific ++ common
 
-  lazy val kamon = kamonSpecific ++ lightbendSpecific  ++ common
+  lazy val kamon = kamonSpecific ++ lightbendSpecific ++ common
 
-  lazy val lightbend = lightbendSpecific  ++ common
+  lazy val lightbend = lightbendSpecific ++ common
 
   lazy val trace4cats = catsEffectSpecific ++ trace4catsSpecific ++ common
 

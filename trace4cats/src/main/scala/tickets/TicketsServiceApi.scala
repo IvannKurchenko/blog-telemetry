@@ -15,16 +15,16 @@ import tickets.service.TicketsService
 
 class TicketsServiceApi[F[_]](service: TicketsService[F])
                              (implicit F: Sync[F], A: Async[F], C: Concurrent[F]) {
-  private val dsl = Http4sDsl[F]
+  private object dsl extends Http4sDsl[F]
   import dsl._
 
-  private implicit val jsonEncoder: EntityEncoder[F, Json] = jsonEncoder[F]
+  private implicit val encoder: EntityEncoder[F, Json] = jsonEncoder[F]
   private implicit val createTicketDecoder: EntityDecoder[F, CreateTicket] = jsonOf[F, CreateTicket]
   private implicit val updateTicketDecoder: EntityDecoder[F, UpdateTicket] = jsonOf[F, UpdateTicket]
 
-  object SearchQueryParamMatcher extends OptionalQueryParamDecoderMatcher[String]("search")
+  private object SearchQueryParamMatcher extends OptionalQueryParamDecoderMatcher[String]("search")
 
-  object ProjectIdQueryParamMatcher extends OptionalQueryParamDecoderMatcher[Long]("project")
+  private object ProjectIdQueryParamMatcher extends OptionalQueryParamDecoderMatcher[Long]("project")
 
   object ProjectIdPathMatcher {
     def unapply(str: String): Option[Long] = str.toLongOption
@@ -59,4 +59,8 @@ class TicketsServiceApi[F[_]](service: TicketsService[F])
       } yield resp
 
   }.orNotFound
+}
+
+object TicketsServiceApi {
+
 }
