@@ -1,0 +1,50 @@
+# Docker compose to run environment for tickets-service and prometheus instance.
+# Run with the following command: docker-compose -f docker-compose/prometheus-docker-compose.yml up -d
+# Stop with the following command: docker-compose -f docker-compose/prometheus-docker-compose.yml down
+# After start open http://localhost:9090 to verify Prometheus is up and running
+version: "3.9"
+
+services:
+  projects_service:
+    extends:
+      file: common-environment-docker-compose.yml
+      service: projects_service
+    hostname: projects_service
+
+  postgres:
+    extends:
+      file: common-environment-docker-compose.yml
+      service: postgres
+
+  elasticsearch:
+    extends:
+      file: common-environment-docker-compose.yml
+      service: elasticsearch
+
+  zookeeper:
+    extends:
+      file: common-environment-docker-compose.yml
+      service: zookeeper
+
+  kafka-1:
+    extends:
+      file: common-environment-docker-compose.yml
+      service: kafka-1
+
+  kafka-2:
+    extends:
+      file: common-environment-docker-compose.yml
+      service: kafka-2
+
+  prometheus:
+    build: docker-prometheus/.
+    container_name: prometheus
+    hostname: prometheus
+    restart: always
+    networks:
+      - tickets
+    ports:
+      - "9090:9090"
+
+networks:
+  tickets:

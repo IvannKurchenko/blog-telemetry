@@ -5,13 +5,14 @@ import cats.implicits._
 import cats.effect.{Async, Sync}
 import doobie._
 import doobie.implicits._
+import tickets.PostgreConfiguration
 import tickets.model.Ticket
 
-class TicketsPostgresRepository[F[_]: Sync: Async] {
+class TicketsPostgresRepository[F[_]: Sync: Async](configuration: PostgreConfiguration) {
 
   private val xa = Transactor.fromDriverManager[F](
     "org.postgresql.Driver",
-    "jdbc:postgresql://localhost:5432/tickets",
+    configuration.url,
     "tickets_user",
     "tickets_password"
   )

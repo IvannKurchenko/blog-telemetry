@@ -1,6 +1,6 @@
 # Docker compose to run tickets service, environment for it and prometheus agent
-# Run with following command: docker-compose -f docker-compose/zipkin-docker-compose.yml up -d
-# Stop with following command: docker-compose -f docker-compose/zipkin-docker-compose.yml down
+# Run with following command: docker-compose -f docker-compose/kamon/zipkin-docker-compose.yml up -d
+# Stop with following command: docker-compose -f docker-compose/kamon/zipkin-docker-compose.yml down
 # After start open http://localhost:9411 to verify Zipkin is up and running
 version: "3"
 services:

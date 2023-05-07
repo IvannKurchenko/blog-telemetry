@@ -17,7 +17,7 @@ Trace4cats
 
 
 # Telemetry with Scala, part 3: trace4cats
-![](images/trace4cats/diagram_trace4cats.png)
+![](images/otel4s/diagram_trace4cats.png)
 
 ## Introduction
 Welcome to the third part of telemetry with Scala series! In previous posts, we explored [OpenTelemetry](https://medium.com/@ivan-kurchenko/telemetry-with-scala-part-1-opentelemetry-758c72a136e7) and [Kamon](https://medium.com/@ivan-kurchenko/telemetry-with-scala-part-2-kamon-5295dd9e3a1), two popular telemetry solutions for Scala and Akka based applications.
@@ -111,6 +111,8 @@ Aside note, http4s provide milldeware to expose Prometheus metrics, but it is no
 https://http4s.github.io/http4s-prometheus-metrics/
 
 ### Metrics example: Prometheus
+localhost:9094 - see all metrics
+TODO: Add screenshot with metrics
 
 ### Tracing
 HOW TO PASS TRACING CONTEXT THOUGH IO AND APPLICATION (LOGS) TO ANOTHER SERVICE!

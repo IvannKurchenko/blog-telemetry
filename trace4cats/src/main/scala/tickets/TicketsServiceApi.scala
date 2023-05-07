@@ -1,6 +1,5 @@
 package tickets
 
-import cats.data.Kleisli
 import cats.effect._
 import cats.implicits._
 import io.circe.Json
@@ -10,10 +9,12 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.implicits._
+import org.typelevel.otel4s.Attribute
+import org.typelevel.otel4s.trace.Tracer
 import tickets.model.{CreateTicket, UpdateTicket}
 import tickets.service.TicketsService
 
-class TicketsServiceApi[F[_]](service: TicketsService[F])
+class TicketsServiceApi[F[_]: Tracer](service: TicketsService[F])
                              (implicit F: Sync[F], A: Async[F], C: Concurrent[F]) {
   private object dsl extends Http4sDsl[F]
   import dsl._
@@ -30,12 +31,16 @@ class TicketsServiceApi[F[_]](service: TicketsService[F])
     def unapply(str: String): Option[Long] = str.toLongOption
   }
 
-  def app: Kleisli[F, Request[F], Response[F]] = HttpRoutes.of[F] {
+  def app: HttpApp[F] = HttpRoutes.of[F] {
     case _@GET -> Root / "tickets" :? SearchQueryParamMatcher(search) +& ProjectIdQueryParamMatcher(project) =>
-      for {
-        tickets <- service.searchTickets(search, project)
-        resp <- Ok(tickets.asJson)
-      } yield resp
+      Tracer[F]
+        .span("internal", Attribute("search", search.getOrElse("")))
+        .surround {
+          for {
+            tickets <- service.searchTickets(search, project)
+            resp <- Ok(tickets.asJson)
+          } yield resp
+        }
 
     case req@POST -> Root / "tickets" =>
       for {
@@ -59,8 +64,4 @@ class TicketsServiceApi[F[_]](service: TicketsService[F])
       } yield resp
 
   }.orNotFound
-}
-
-object TicketsServiceApi {
-
 }

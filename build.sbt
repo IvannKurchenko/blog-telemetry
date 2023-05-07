@@ -79,14 +79,15 @@ lazy val trace4cats =
       resolvers += "confluent" at "https://packages.confluent.io/maven/",
       libraryDependencies := Dependencies.trace4cats,
 
-      javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.11.0",
+      javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.24.0",
       javaOptions += "-Dotel.javaagent.debug=true",
+      javaOptions += "-Dotel.java.global-autoconfigure.enabled=true",
 
       mainClass := Some("tickets.TicketsServiceApplication"),
 
       dockerExposedPorts := Seq(10000),
       dockerBaseImage := "openjdk:17",
-      Docker / packageName := "tickets_service_trace4cats",
+      Docker / packageName := "tickets_service_otel4s",
       Docker / version := "latest",
       Docker / dockerChmodType := DockerChmodType.UserGroupWriteExecute
     )

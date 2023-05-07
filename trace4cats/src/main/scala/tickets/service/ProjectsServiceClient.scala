@@ -5,20 +5,19 @@ import cats.implicits._
 import fs2.io.net.Network
 import io.circe.generic.auto._
 import org.http4s._
+import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.circe.CirceEntityCodec._
-import org.http4s.ember.client.EmberClientBuilder
 import tickets.ProjectsServiceConfiguration
 import tickets.model.Project
 
 class ProjectsServiceClient[F[_]](configuration: ProjectsServiceConfiguration)
-                                                       (implicit F: Sync[F], A: Async[F], N: Network[F]) {
+                                 (implicit F: Sync[F], A: Async[F], N: Network[F]) {
 
-  def findProject(id: Long): F[Option[Project]] = {
-    EmberClientBuilder
-      .default[F]
-      .build
+  def findProject(projectId: Long): F[Option[Project]] = {
+    BlazeClientBuilder[F]
+      .resource
       .use { client =>
-        val request = Request[F](Method.GET, Uri.unsafeFromString(s"${configuration.url}/projects/$id"))
+        val request = Request[F](Method.GET, Uri.unsafeFromString(s"${configuration.url}/projects/$projectId"))
         client.run(request).use { response =>
           response.status match {
             case Status.NotFound => F.pure(None)

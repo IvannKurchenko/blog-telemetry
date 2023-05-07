@@ -6,13 +6,16 @@ import cats.effect.{Async, Sync}
 import org.http4s.dsl.Http4sDslBinCompat
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
+import org.typelevel.otel4s.java.metrics.Metrics
+import org.typelevel.otel4s.metrics.{Meter, UpDownCounter}
 import tickets.model.{CreateTicket, Ticket, UpdateTicket}
 
 class TicketsService[F[_]](postgres: TicketsPostgresRepository[F],
                            elastic: TicketsElasticRepository[F],
                            kafka: TicketsKafkaProducer[F],
                            projects: ProjectsServiceClient[F],
-                           /*ticketsCounter: LongCounter*/)(implicit F: Sync[F], A: Async[F]) {
+                           ticketsCounter: UpDownCounter[F, Long])
+                          (implicit F: Sync[F], A: Async[F]) {
 
   implicit def logger: Logger[F] = Slf4jLogger.getLogger[F]
 
@@ -31,11 +34,20 @@ class TicketsService[F[_]](postgres: TicketsPostgresRepository[F],
 
     for {
       _ <- logger.info(s"Creating ticket: $ticket")
+
+      _ <- logger.info(s"Checking projects exists: ${ticket.project}")
       _ <- verifyProject(ticket.project)
+
+      _ <- logger.info(s"Persisting ticket in database: $ticket")
       ticket <- postgres.create(ticket)
+
+      _ <- logger.info(s"Indexing ticket in Elasticsearch: $ticket")
       _ <- elastic.indexTicket(ticket)
+
+      _ <- logger.info(s"Send ticket notification: $ticket")
       _ <- kafka.sendCreated(ticket)
-      //_ <- Future(ticketsCounter.add(1))
+
+      _ <- ticketsCounter.add(1)
       _ <- logger.info(s"Created ticket: $ticket")
     } yield {
       ticket
@@ -82,13 +94,13 @@ class TicketsService[F[_]](postgres: TicketsPostgresRepository[F],
     for {
       count <- postgres.delete(id)
       _ <- elastic.deleteTicket(id)
-      //_ <- Future(ticketsCounter.add(-1))
+      _ <- ticketsCounter.add(-1)
     } yield count > 0
   }
 
-  private def verifyProject(project: Long): F[Unit] = {
+  private def verifyProject(projectId: Long): F[Unit] = {
     for {
-      project <- projects.findProject(project)
+      project <- projects.findProject(projectId)
       _ <- project.fold(F.raiseError[Unit](new Exception(s"No project found: $project")))(_ => F.unit)
     } yield ()
   }

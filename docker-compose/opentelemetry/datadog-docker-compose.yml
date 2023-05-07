@@ -1,6 +1,6 @@
 # See for more details: https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent
-# Run with following command: docker-compose -f docker-compose/datadog-docker-compose.yml up -d
-# Stop with following command: docker-compose -f docker-compose/datadog-docker-compose.yml down
+# Run with following command: docker-compose -f docker-compose/opentelemetry/datadog-docker-compose.yml up -d
+# Stop with following command: docker-compose -f docker-compose/opentelemetry/datadog-docker-compose.yml down
 version: "3"
 services:
   projects_service:

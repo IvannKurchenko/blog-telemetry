@@ -1,6 +1,7 @@
-# See for more details: https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent
-# Run with following command: docker-compose -f docker-compose/datadog-docker-compose.yml up -d
-# Stop with following command: docker-compose -f docker-compose/datadog-docker-compose.yml down
+# Docker compose to run tickets service, environment for it and prometheus agent
+# Run with following command: docker-compose -f docker-compose/zipkin-docker-compose.yml up -d
+# Stop with following command: docker-compose -f docker-compose/zipkin-docker-compose.yml down
+# After start open http://localhost:9411 to verify Zipkin is up and running
 version: "3"
 services:
   projects_service:
@@ -87,33 +88,26 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
-  opentelemetry-collector-contrib:
-    build: ../docker-opentelemetry-collector-contrib
-    container_name: opentelemetry-collector-contrib
-    hostname: opentelemetry-collector-contrib
+  zipkin:
+    image: openzipkin/zipkin:2
+    hostname: zipkin
+    container_name: zipkin
     restart: always
-    command: ["--config=/etc/otel-collector-config.yaml"]
     networks:
       - tickets
     ports:
-      - "4317:4317"
       - "9411:9411"
-      - "14250:14250"
-      - "14268:14268"
-      - "6831:6831"
-      - "55680:55680"
-      - "55681:55681"
 
   tickets_service:
-    image: tickets_service_otel
-    container_name: tickets_service_otel
+    image: tickets_service_otel4s
+    container_name: tickets_service_otel4s
     hostname: tickets_service
     restart: always
     environment:
       - OTEL_SERVICE_NAME=tickets_service
-      - OTEL_TRACES_EXPORTER=otlp
-      - OTEL_METRICS_EXPORTER=otlp
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://opentelemetry-collector-contrib:4317
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_TRACES_EXPORTER=zipkin
+      - OTEL_EXPORTER_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
       - APPLICATION_ELASTICSEARCH_URL=http://elasticsearch:9200
       - APPLICATION_POSTGRE_URL=jdbc:postgresql://postgres:5432/tickets?user=tickets_user&password=tickets_password
       - APPLICATION_POSTGRE_HOST=postgres
@@ -130,7 +124,7 @@ services:
       - zookeeper
       - kafka-1
       - kafka-2
-      - opentelemetry-collector-contrib
+      - zipkin
 
 networks:
   tickets:

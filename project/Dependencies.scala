@@ -68,12 +68,10 @@ object Dependencies {
       "io.opentelemetry" % "opentelemetry-bom" % version pomOnly(),
       "io.opentelemetry" % "opentelemetry-api" % version,
       "io.opentelemetry" % "opentelemetry-sdk" % version,
-      "io.opentelemetry" % "opentelemetry-exporter-jaeger" % version,
       "io.opentelemetry" % "opentelemetry-sdk-extension-autoconfigure" % alphaVersion,
       "io.opentelemetry" % "opentelemetry-exporter-prometheus" % alphaVersion,
       "io.opentelemetry" % "opentelemetry-exporter-zipkin" % version,
-      "io.opentelemetry" % "opentelemetry-exporter-jaeger" % version,
-      "io.opentelemetry" % "opentelemetry-exporter-otlp" % version,
+      //"io.opentelemetry" % "opentelemetry-exporter-otlp" % version,
 
       "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % version % "runtime"
     )
@@ -93,7 +91,7 @@ object Dependencies {
 
   lazy val catsEffectSpecific = {
     val catsEffectVersion = "3.4.8"
-    val http4sVersion = "0.23.18"
+    val http4sVersion = "0.23.14"
     val doobieVersion = "1.0.0-RC1"
     val log4catsVersion = "2.5.0"
     val fs2Version = "3.0.0"
@@ -106,8 +104,8 @@ object Dependencies {
       "org.http4s" %% "http4s-client" % http4sVersion,
       "org.http4s" %% "http4s-server" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
-      "org.http4s" %% "http4s-ember-client" % http4sVersion,
-      "org.http4s" %% "http4s-ember-server" % http4sVersion,
+      "org.http4s" %% "http4s-blaze-client" % http4sVersion,
+      "org.http4s" %% "http4s-blaze-server" % http4sVersion,
 
       "org.tpolecat" %% "doobie-core" % doobieVersion,
 
@@ -116,21 +114,11 @@ object Dependencies {
 
       "com.github.fd4s" %% "fs2-kafka" % fs2Version,
 
+      "org.typelevel" %% "otel4s-java" % "0.2.1",
+
       "org.typelevel" %% "log4cats-core" % log4catsVersion,
       "org.typelevel" %% "log4cats-slf4j" % log4catsVersion,
       "ch.qos.logback" % "logback-classic" % "1.4.6"
-    )
-  }
-
-  lazy val trace4catsSpecific = {
-    val trace4catsVersion = "0.14.2"
-    val trace4catsHttps4sVersion = "0.14.0"
-
-    Seq(
-      "io.janstenpickle" %% "trace4cats-core" % trace4catsVersion,
-
-      "io.janstenpickle" %% "trace4cats-http4s-client" % trace4catsHttps4sVersion,
-      "io.janstenpickle" %% "trace4cats-http4s-server" % trace4catsHttps4sVersion
     )
   }
 
@@ -140,7 +128,7 @@ object Dependencies {
 
   lazy val lightbend = lightbendSpecific ++ common
 
-  lazy val trace4cats = catsEffectSpecific ++ trace4catsSpecific ++ common
+  lazy val trace4cats = catsEffectSpecific ++ openTelemetrySpecific ++ common
 
   lazy val gatling = {
     val gatlingVersion = "3.9.2"
