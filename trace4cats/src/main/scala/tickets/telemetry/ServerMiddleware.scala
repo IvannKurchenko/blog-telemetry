@@ -13,7 +13,7 @@ trait ServerMiddleware {
     def traced: HttpApp[F] = {
       Kleisli { (req: Request[F]) =>
         Tracer[F]
-          .spanBuilder("handle-request")
+          .spanBuilder("handle-incoming-request")
           .addAttribute(Attribute("http.method", req.method.name))
           .addAttribute(Attribute("http.url", req.uri.renderString))
           .withSpanKind(SpanKind.Server)
@@ -27,8 +27,6 @@ trait ServerMiddleware {
                 if (response.status.isSuccess) span.setStatus(Status.Ok) else span.setStatus(Status.Error)
               }
             } yield {
-              // todo - https://www.w3.org/TR/trace-context/
-              // add w3c headers
               val traceIdHeader = Header.Raw(CIString("traceId"), span.context.traceIdHex)
               response.putHeaders(traceIdHeader)
             }
