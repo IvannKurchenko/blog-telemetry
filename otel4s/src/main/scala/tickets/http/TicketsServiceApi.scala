@@ -60,7 +60,8 @@ class TicketsServiceApi[F[_] : Async : Tracer](service: TicketsService[F]) {
           resp <- Ok("")
         } yield resp
 
-    }.orNotFound
+    }
+      .orNotFound
      .traced
   }
 }

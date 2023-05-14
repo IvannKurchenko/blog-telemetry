@@ -1,11 +1,11 @@
 package tickets
 
-import cats.effect.{Async, Concurrent, LiftIO, Resource, Sync}
 import cats.implicits._
+import cats.effect.{Async, Concurrent, LiftIO, Resource, Sync}
 import io.opentelemetry.api.GlobalOpenTelemetry
 import org.typelevel.otel4s.Otel4s
 import org.typelevel.otel4s.java.OtelJava
-import org.typelevel.otel4s.metrics.UpDownCounter
+import org.typelevel.otel4s.metrics.{Meter, UpDownCounter}
 import org.typelevel.otel4s.trace.Tracer
 import tickets.http.TicketsServiceApi
 import tickets.service._
@@ -32,7 +32,7 @@ object TicketsServiceModule {
     otelResource.use(buildInternal[F])
   }
 
-  private def otelResource[F[_]: Sync: Async: LiftIO] = {
+  private def otelResource[F[_]: Sync: Async: LiftIO]: Resource[F, Otel4s[F]] = {
     Resource
       .eval(Sync[F].delay(GlobalOpenTelemetry.get))
       .evalMap(OtelJava.forAsync[F])
@@ -41,11 +41,9 @@ object TicketsServiceModule {
   private def buildInternal[F[_]: Sync: Async: Concurrent: LiftIO](otel: Otel4s[F]) = {
     for {
       configuration <- Sync[F].delay(TicketsConfiguration.load)
-      telemetry <- Sync[F].delay(GlobalOpenTelemetry.get)
-      otel <- OtelJava.forAsync[F](telemetry)
 
-      traceProvider <- otel.tracerProvider.get("tickets-service")
-      metricsProvider <- otel.meterProvider.get("tickets-service")
+      traceProvider: Tracer[F] <- otel.tracerProvider.get("tickets-service")
+      metricsProvider: Meter[F] <- otel.meterProvider.get("tickets-service")
 
       ticketsCounter <- metricsProvider
         .upDownCounter("tickets_count")

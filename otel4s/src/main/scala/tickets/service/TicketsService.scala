@@ -9,6 +9,7 @@ import io.opentelemetry.context.ContextStorage
 import org.http4s.dsl.Http4sDslBinCompat
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
+import org.typelevel.otel4s.Attribute
 import org.typelevel.otel4s.java.metrics.Metrics
 import org.typelevel.otel4s.metrics.{Meter, UpDownCounter}
 import tickets.model.{CreateTicket, Ticket, UpdateTicket}
@@ -49,11 +50,9 @@ class TicketsService[F[_]](postgres: TicketsPostgresRepository[F],
       _ <- logger.info(s"Send ticket notification: $ticket")
       _ <- kafka.sendCreated(ticket)
 
-      _ <- ticketsCounter.add(1)
+      _ <- ticketsCounter.add(1, Attribute("project.id", ticket.id)) // Increase metrics counter
       _ <- logger.info(s"Created ticket: $ticket")
-    } yield {
-      ticket
-    }
+    } yield ticket
   }
 
   def searchTickets(query: Option[String], project: Option[Long]): F[List[Ticket]] = {

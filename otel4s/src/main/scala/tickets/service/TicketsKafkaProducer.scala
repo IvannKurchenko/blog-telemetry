@@ -27,8 +27,7 @@ class TicketsKafkaProducer[F[_]: Async: Tracer](kafka: KafkaConfiguration) {
   }
 
   private def send(event: TicketEvent): F[ProducerResult[String, TicketEvent]] = {
-    KafkaProducer.resource(producerSettings).use { producer =>
-      producer.produceOneTraced(kafka.topic, event.ticket.id.toString, event)
-    }
+    KafkaProducer.resource(producerSettings)
+      .use(_.produceOneTraced(kafka.topic, event.ticket.id.toString, event))
   }
 }

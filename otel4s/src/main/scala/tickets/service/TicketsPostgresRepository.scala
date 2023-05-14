@@ -49,7 +49,7 @@ class TicketsPostgresRepository[F[_]: Sync: Async: Tracer](configuration: Postgr
 
   def create(ticket: Ticket): F[Ticket] = {
     Tracer[F]
-      .span("create")
+      .span("postgres.create")
       .surround {
         for {
           id <-

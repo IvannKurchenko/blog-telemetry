@@ -80,8 +80,8 @@ lazy val trace4cats =
       libraryDependencies := Dependencies.trace4cats,
 
       javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.24.0",
-      javaOptions += "-Dotel.javaagent.debug=true",
       javaOptions += "-Dotel.java.global-autoconfigure.enabled=true",
+      javaOptions += "-Dotel.javaagent.debug=true",
 
       mainClass := Some("tickets.TicketsServiceApplication"),
 
