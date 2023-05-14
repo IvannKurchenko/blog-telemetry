@@ -1,8 +1,9 @@
 package tickets
 
-import cats.effect.{Async, Concurrent, LiftIO, Sync}
+import cats.effect.{Async, Concurrent, LiftIO, Resource, Sync}
 import cats.implicits._
 import io.opentelemetry.api.GlobalOpenTelemetry
+import org.typelevel.otel4s.Otel4s
 import org.typelevel.otel4s.java.OtelJava
 import org.typelevel.otel4s.metrics.UpDownCounter
 import org.typelevel.otel4s.trace.Tracer
@@ -26,7 +27,18 @@ class TicketsServiceModule[F[_]: Sync: Async: Concurrent: Tracer](
 }
 
 object TicketsServiceModule {
+
   def build[F[_]: Sync: Async: Concurrent: LiftIO] = {
+    otelResource.use(buildInternal[F])
+  }
+
+  private def otelResource[F[_]: Sync: Async: LiftIO] = {
+    Resource
+      .eval(Sync[F].delay(GlobalOpenTelemetry.get))
+      .evalMap(OtelJava.forAsync[F])
+  }
+
+  private def buildInternal[F[_]: Sync: Async: Concurrent: LiftIO](otel: Otel4s[F]) = {
     for {
       configuration <- Sync[F].delay(TicketsConfiguration.load)
       telemetry <- Sync[F].delay(GlobalOpenTelemetry.get)
