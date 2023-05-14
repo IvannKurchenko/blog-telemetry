@@ -1,17 +1,20 @@
 package tickets
 
-import cats.effect.{Async, Concurrent, Sync}
-import org.typelevel.otel4s.java.metrics.Metrics
-import org.typelevel.otel4s.metrics.{Meter, UpDownCounter}
+import cats.effect.{Async, Concurrent, LiftIO, Sync}
+import cats.implicits._
+import io.opentelemetry.api.GlobalOpenTelemetry
+import org.typelevel.otel4s.java.OtelJava
+import org.typelevel.otel4s.metrics.UpDownCounter
 import org.typelevel.otel4s.trace.Tracer
+import tickets.http.TicketsServiceApi
 import tickets.service._
 
 import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
 
-class TicketsServiceModule[F[_]: Sync: Async: Concurrent](configuration: TicketsConfiguration,
-                                                          ticketsCounter: UpDownCounter[F, Long])
-                                                         (implicit tracer: Tracer[F]) {
+class TicketsServiceModule[F[_]: Sync: Async: Concurrent: Tracer](
+                                                                   configuration: TicketsConfiguration,
+                                                          ticketsCounter: UpDownCounter[F, Long]) {
   implicit lazy val executionContext: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
 
   lazy val kafka = new TicketsKafkaProducer[F](configuration.kafka)
@@ -20,4 +23,27 @@ class TicketsServiceModule[F[_]: Sync: Async: Concurrent](configuration: Tickets
   lazy val projects = new ProjectsServiceClient[F](configuration.projects)
   lazy val service = new TicketsService[F](repo, elastic, kafka, projects, ticketsCounter)
   lazy val api = new TicketsServiceApi[F](service)
+}
+
+object TicketsServiceModule {
+  def build[F[_]: Sync: Async: Concurrent: LiftIO] = {
+    for {
+      configuration <- Sync[F].delay(TicketsConfiguration.load)
+      telemetry <- Sync[F].delay(GlobalOpenTelemetry.get)
+      otel <- OtelJava.forAsync[F](telemetry)
+
+      traceProvider <- otel.tracerProvider.get("tickets-service")
+      metricsProvider <- otel.meterProvider.get("tickets-service")
+
+      ticketsCounter <- metricsProvider
+        .upDownCounter("tickets_count")
+        .withUnit("1")
+        .withDescription("Tickets count")
+        .create
+
+    } yield {
+      implicit val tracer: Tracer[F] = traceProvider
+      new TicketsServiceModule[F](configuration, ticketsCounter)
+    }
+  }
 }

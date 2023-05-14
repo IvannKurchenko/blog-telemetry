@@ -110,6 +110,8 @@ doobie - auto instrumentation via OTEL (JDBC) + custom span coverage
 Aside note, http4s provide milldeware to expose Prometheus metrics, but it is not a part of trace4cats.
 https://http4s.github.io/http4s-prometheus-metrics/
 
+https://http4s.org/v0.21/middleware/
+
 ### Metrics example: Prometheus
 localhost:9094 - see all metrics
 TODO: Add screenshot with metrics

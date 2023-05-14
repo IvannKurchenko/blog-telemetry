@@ -1,4 +1,4 @@
-# Docker compose with required environment for tickets service.
+# Docker compose with required environment for tickets-service.
 #
 # Run with the following command: docker-compose -f docker-compose/common-environment-docker-compose.yml up -d
 # Stop with the following command: docker-compose -f docker-compose/common-environment-docker-compose.yml down

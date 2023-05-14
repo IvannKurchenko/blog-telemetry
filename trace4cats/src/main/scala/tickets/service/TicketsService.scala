@@ -3,6 +3,9 @@ package tickets.service
 import cats.data.NonEmptyList
 import cats.implicits._
 import cats.effect.{Async, Sync}
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.{GlobalOpenTelemetry, OpenTelemetry}
+import io.opentelemetry.context.ContextStorage
 import org.http4s.dsl.Http4sDslBinCompat
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
@@ -30,7 +33,6 @@ class TicketsService[F[_]](postgres: TicketsPostgresRepository[F],
       modifiedAt = System.currentTimeMillis(),
       modifiedBy = create.creator,
     )
-
 
     for {
       _ <- logger.info(s"Creating ticket: $ticket")

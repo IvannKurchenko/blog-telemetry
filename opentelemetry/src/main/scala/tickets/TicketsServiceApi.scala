@@ -9,7 +9,8 @@ import io.circe.generic.auto._
 import tickets.model.{CreateTicket, UpdateTicket}
 import tickets.service.TicketsService
 
-class TicketsServiceApi(service: TicketsService) {
+class
+TicketsServiceApi(service: TicketsService) {
 
   val route =
     pathPrefix("tickets") {

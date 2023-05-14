@@ -71,7 +71,7 @@ object Dependencies {
       "io.opentelemetry" % "opentelemetry-sdk-extension-autoconfigure" % alphaVersion,
       "io.opentelemetry" % "opentelemetry-exporter-prometheus" % alphaVersion,
       "io.opentelemetry" % "opentelemetry-exporter-zipkin" % version,
-      //"io.opentelemetry" % "opentelemetry-exporter-otlp" % version,
+      "io.opentelemetry" % "opentelemetry-exporter-otlp" % version,
 
       "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % version % "runtime"
     )
@@ -118,7 +118,9 @@ object Dependencies {
 
       "org.typelevel" %% "log4cats-core" % log4catsVersion,
       "org.typelevel" %% "log4cats-slf4j" % log4catsVersion,
-      "ch.qos.logback" % "logback-classic" % "1.4.6"
+      "ch.qos.logback" % "logback-classic" % "1.4.6",
+
+      "io.monix" %% "monix" % "3.4.1" exclude("io.monix", "monix-catnap_2.13")
     )
   }
 
