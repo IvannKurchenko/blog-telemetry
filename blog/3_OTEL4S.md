@@ -1,23 +1,3 @@
-
-
-## Introduction
-Introduction
-- What this post is about, last in series
-
-Trace4cats
-- Overview:
-    - description supported exports (zipkin, Jaeger etc),
-    - supported instrumentation
-    - Possible APM solutions to plug
-    - otel4s https://github.com/typelevel/otel4s
-    - 
-- How to plug for our application
-- Tracing example: Zipking
-- Metrics example: Influx + Grafana
-- APM Example: Splunk or Datalog
-- Conclusion: couple words, pros, cons, compare with otel4s https://github.com/typelevel/otel4s
-
-
 # Telemetry with Scala, part 3: trace4cats
 ![](images/otel4s/diagram_otel4s.png)
 
@@ -294,7 +274,7 @@ You can find instructions on how to configure it for OpenTelemetry in [Part 1](h
 Below you can see a screenshot of Zipkin UI with traces from our application for ticket creation flow:
 ![](images%2Fotel4s%2Fzipking_create_ticket_trace.png)
 
-All the code you can find in [this repository]()
+All the code you can find in [this repository](https://github.com/IvannKurchenko/blog-telemetry/tree/main/otel4s/src/main)
 
 ### Conclusion 
 In this article, we've seen how to use `otel4s` to instrument Scala applications with OpenTelemetry.
