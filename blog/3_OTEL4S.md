@@ -1,4 +1,4 @@
-# Telemetry with Scala, part 3: trace4cats
+# Telemetry with Scala, part 3: otel4s
 ![](images/otel4s/diagram_otel4s.png)
 
 ## Introduction
